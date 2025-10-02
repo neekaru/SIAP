@@ -53,11 +53,11 @@
         </div>
 
         <div class="grid">
-            <div class="card">
+            <div class="card" id="card-absen-masuk" style="cursor:pointer">
                 <div class="icon-outer">icon</div>
                 <div class="card-label">Absen Masuk</div>
             </div>
-            <div class="card">
+            <div class="card" id="card-absen-pulang" style="cursor:pointer">
                 <div class="icon-outer">icon</div>
                 <div class="card-label">Absen Pulang</div>
             </div>
@@ -67,5 +67,56 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal -->
+    <div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;z-index:40">
+        <div id="modal" style="background:#fff;width:720px;max-width:92%;padding:22px;box-shadow:0 8px 30px rgba(0,0,0,0.2)">
+            <div style="background:#e9e9e9;padding:18px;text-align:center;margin-bottom:12px">
+                <div style="font-size:18px">Waktu Absen</div>
+                <div style="font-size:28px;font-weight:600;margin-top:8px">23:59 WIB</div>
+                <div style="margin-top:6px;color:#555">Wednesday, 24 September 2025</div>
+            </div>
+
+            <div style="background:#efefef;padding:12px;margin-bottom:10px">Lokasi Live<br><small>Lokasi sedang dilacak secara real-time</small><span style="float:right">Akurasi: 500 m</span></div>
+
+            <div style="border:1px solid #ddd;padding:12px;margin-bottom:12px">
+                <div style="font-weight:600">Konfirmasi Lokasi</div>
+                <div style="margin-top:6px">Klik "Konfirmasi Lokasi" untuk memverifikasi posisi Anda</div>
+                <div style="text-align:right;margin-top:8px"><button id="btn-confirm-location">Konfirmasi Lokasi</button></div>
+            </div>
+
+            <div style="background:#e9e9e9;height:180px;display:flex;align-items:center;justify-content:center;margin-bottom:16px">Maps</div>
+
+            <div style="display:flex;gap:18px;justify-content:center">
+                <button id="btn-confirm-absen" style="padding:10px 18px">Konfirmasi Absen Masuk</button>
+                <button id="btn-cancel" style="padding:10px 18px">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const card = document.getElementById('card-absen-masuk');
+        const overlay = document.getElementById('modal-overlay');
+        const btnCancel = document.getElementById('btn-cancel');
+        const btnConfirm = document.getElementById('btn-confirm-absen');
+
+        card.addEventListener('click', function () {
+            overlay.style.display = 'flex';
+        });
+
+        btnCancel.addEventListener('click', function () {
+            overlay.style.display = 'none';
+        });
+
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) overlay.style.display = 'none';
+        });
+
+        btnConfirm.addEventListener('click', function () {
+            // Placeholder: implement confirm action (AJAX post) here
+            alert('Absen masuk dikonfirmasi');
+            overlay.style.display = 'none';
+        });
+    </script>
 </body>
 </html>
