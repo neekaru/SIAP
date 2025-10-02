@@ -11,7 +11,7 @@
         .card{width:90%;max-width:1100px;padding:80px 40px;text-align:center;background:linear-gradient(#e9e9e9,#f4f4f4);box-shadow:0 2px 6px rgba(0,0,0,0.05)}
         h1{margin:0 0 48px;font-weight:500;font-size:28px}
         .actions{display:flex;gap:40px;justify-content:center}
-        .btn{background:var(--btn);padding:18px 36px;border-radius:4px;border:1px solid rgba(0,0,0,0.06);min-width:160px;cursor:pointer;font-size:16px}
+        .btn{background:var(--btn);padding:18px 36px;border-radius:4px;border:1px solid rgba(0,0,0,0.06);min-width:160px;cursor:pointer;font-size:16px;text-decoration:none;color:var(--text);display:inline-flex;align-items:center;justify-content:center}
         @media (max-width:640px){.actions{flex-direction:column;gap:20px}.card{padding:48px 20px}h1{font-size:20px}}
     </style>
 </head>
@@ -20,9 +20,9 @@
         <div class="card">
             <h1>Silahkan Melakukan Login</h1>
             <div class="actions">
-                <button class="btn">Login Guru</button>
-                <button class="btn">Login Siswa</button>
-                <button class="btn">Login Admin</button>
+                <a href="/login/guru" class="btn" role="button">Login Guru</a>
+                <a href="/login/siswa" class="btn" role="button">Login Siswa</a>
+                <a href="/login/admin" class="btn" role="button">Login Admin</a>
             </div>
         </div>
     </div>
