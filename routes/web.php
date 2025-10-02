@@ -18,3 +18,8 @@ Route::get('/login/siswa', function () {
 Route::get('/login/admin', function () {
     return view('auth.login', ['role' => 'Admin']);
 })->name('login.admin');
+
+// Siswa dashboard
+Route::get('/siswa-dashboard', function () {
+    return view('siswa.dashboard');
+})->name('siswa.dashboard');
