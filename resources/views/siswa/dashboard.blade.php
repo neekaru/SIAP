@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Siswa Dashboard</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         :root{--bg:#dcdcdc;--panel:#ffffff;--muted:#cfcfcf;--accent:#f6a2a2;--text:#111}
         html,body{height:100%;margin:0;font-family:Arial, Helvetica, sans-serif;color:var(--text)}
@@ -77,7 +78,11 @@
                 <div style="margin-top:6px;color:#555">Wednesday, 24 September 2025</div>
             </div>
 
-            <div style="background:#efefef;padding:12px;margin-bottom:10px">Lokasi Live<br><small>Lokasi sedang dilacak secara real-time</small><span style="float:right">Akurasi: 500 m</span></div>
+            <div id="masuk-lokasi-live" style="background:#efefef;padding:12px;margin-bottom:10px">
+                <div id="masuk-location-text">Lokasi Live<br><small>Lokasi sedang dilacak secara real-time</small></div>
+                <div style="float:right"><span id="masuk-accuracy">Akurasi: -</span></div>
+                <div style="clear:both"></div>
+            </div>
 
             <div style="border:1px solid #ddd;padding:12px;margin-bottom:12px">
                 <div style="font-weight:600">Konfirmasi Lokasi</div>
@@ -88,7 +93,7 @@
             <div style="background:#e9e9e9;height:180px;display:flex;align-items:center;justify-content:center;margin-bottom:16px">Maps</div>
 
             <div style="display:flex;gap:18px;justify-content:center">
-                <button id="btn-confirm-absen" style="padding:10px 18px">Konfirmasi Absen Masuk</button>
+                <button id="btn-confirm-absen" style="padding:10px 18px" disabled>Konfirmasi Absen Masuk</button>
                 <button id="btn-cancel" style="padding:10px 18px">Batal</button>
             </div>
         </div>
@@ -113,9 +118,133 @@
         });
 
         btnConfirm.addEventListener('click', function () {
-            // Placeholder: implement confirm action (AJAX post) here
-            alert('Absen masuk dikonfirmasi');
-            overlay.style.display = 'none';
+            if (!window._masukLocation) { alert('Silakan konfirmasi lokasi terlebih dahulu'); return; }
+            fetch('/absen/masuk', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({location: window._masukLocation})
+            }).then(r => r.json()).then(data => {
+                alert('Absen masuk berhasil');
+                overlay.style.display = 'none';
+            }).catch(err => { alert('Gagal: ' + err); });
+        });
+
+        // Absen pulang modal
+        const cardPulang = document.getElementById('card-absen-pulang');
+        // create pulang overlay & modal elements
+        const pulangOverlay = document.createElement('div');
+        pulangOverlay.id = 'modal-overlay-pulang';
+        pulangOverlay.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;z-index:40';
+        pulangOverlay.innerHTML = `
+            <div style="background:#fff;width:720px;max-width:92%;padding:22px;box-shadow:0 8px 30px rgba(0,0,0,0.2)">
+                <div style="background:#e9e9e9;padding:18px;text-align:center;margin-bottom:12px">
+                    <div style="font-size:18px">Waktu Absen Pulang</div>
+                    <div style="font-size:28px;font-weight:600;margin-top:8px">16:30 WIB</div>
+                    <div style="margin-top:6px;color:#555">Wednesday, 24 September 2025</div>
+                </div>
+                <div id="pulang-lokasi-live" style="background:#efefef;padding:12px;margin-bottom:10px">
+                    <div id="pulang-location-text">Lokasi Live<br><small>Lokasi sedang dilacak secara real-time</small></div>
+                    <div style="float:right"><span id="pulang-accuracy">Akurasi: -</span></div>
+                    <div style="clear:both"></div>
+                </div>
+
+                <div style="border:1px solid #ddd;padding:12px;margin-bottom:12px">
+                    <div style="font-weight:600">Konfirmasi Lokasi</div>
+                    <div style="margin-top:6px">Klik "Konfirmasi Lokasi" untuk memverifikasi posisi Anda</div>
+                    <div style="text-align:right;margin-top:8px"><button id="btn-confirm-location-pulang">Konfirmasi Lokasi</button></div>
+                </div>
+
+                <div style="background:#e9e9e9;height:140px;display:flex;align-items:center;justify-content:center;margin-bottom:16px">Maps</div>
+                <div style="display:flex;gap:18px;justify-content:center">
+                    <button id="btn-confirm-pulang" style="padding:10px 18px" disabled>Konfirmasi Absen Pulang</button>
+                    <button id="btn-cancel-pulang" style="padding:10px 18px">Batal</button>
+                </div>
+            </div>`;
+        document.body.appendChild(pulangOverlay);
+
+        cardPulang.addEventListener('click', function () {
+            pulangOverlay.style.display = 'flex';
+        });
+
+        pulangOverlay.addEventListener('click', function (e) {
+            if (e.target === pulangOverlay) pulangOverlay.style.display = 'none';
+        });
+
+        document.getElementById('btn-confirm-pulang').addEventListener('click', function () {
+            if (!window._pulangLocation) { alert('Silakan konfirmasi lokasi terlebih dahulu'); return; }
+            fetch('/absen/pulang', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({location: window._pulangLocation})
+            }).then(r => r.json()).then(data => {
+                alert('Absen pulang berhasil');
+                pulangOverlay.style.display = 'none';
+            }).catch(err => { alert('Gagal: ' + err); });
+        });
+
+        document.getElementById('btn-cancel-pulang').addEventListener('click', function () {
+            pulangOverlay.style.display = 'none';
+        });
+
+        // Konfirmasi lokasi handler for pulang
+        document.getElementById('btn-confirm-location-pulang').addEventListener('click', function () {
+            // Attempt to get current position and update UI
+            if (!navigator.geolocation) {
+                alert('Geolocation tidak didukung di browser Anda');
+                return;
+            }
+            const accEl = document.getElementById('pulang-accuracy');
+            const locText = document.getElementById('pulang-location-text');
+            accEl.innerText = 'Mencari posisi...';
+            navigator.geolocation.getCurrentPosition(function (pos) {
+                const lat = pos.coords.latitude.toFixed(6);
+                const lon = pos.coords.longitude.toFixed(6);
+                const accuracy = Math.round(pos.coords.accuracy) + ' m';
+                accEl.innerText = 'Akurasi: ' + accuracy;
+                locText.innerHTML = 'Posisi: ' + lat + ', ' + lon + '<br><small>Lokasi berhasil didapatkan</small>';
+                // enable pulang confirm button and store location
+                const btnPulang = document.getElementById('btn-confirm-pulang');
+                if (btnPulang) { btnPulang.disabled = false; }
+                window._pulangLocation = {lat: lat, lon: lon, accuracy: accuracy};
+                const confirmLocBtnPulang = document.getElementById('btn-confirm-location-pulang');
+                if (confirmLocBtnPulang) { confirmLocBtnPulang.innerText = 'Terverifikasi'; }
+            }, function (err) {
+                accEl.innerText = 'Akurasi: -';
+                alert('Gagal mendapatkan lokasi: ' + (err.message || 'unknown'));
+            }, {enableHighAccuracy: true, timeout: 10000});
+        });
+
+        // Konfirmasi lokasi handler for masuk
+        document.getElementById('btn-confirm-location').addEventListener('click', function () {
+            if (!navigator.geolocation) {
+                alert('Geolocation tidak didukung di browser Anda');
+                return;
+            }
+            const accEl = document.getElementById('masuk-accuracy');
+            const locText = document.getElementById('masuk-location-text');
+            accEl.innerText = 'Mencari posisi...';
+            navigator.geolocation.getCurrentPosition(function (pos) {
+                const lat = pos.coords.latitude.toFixed(6);
+                const lon = pos.coords.longitude.toFixed(6);
+                const accuracy = Math.round(pos.coords.accuracy) + ' m';
+                accEl.innerText = 'Akurasi: ' + accuracy;
+                locText.innerHTML = 'Posisi: ' + lat + ', ' + lon + '<br><small>Lokasi berhasil didapatkan</small>';
+                // enable masuk confirm button and store location
+                const btnMasuk = document.getElementById('btn-confirm-absen');
+                if (btnMasuk) { btnMasuk.disabled = false; }
+                window._masukLocation = {lat: lat, lon: lon, accuracy: accuracy};
+                const confirmLocBtnMasuk = document.getElementById('btn-confirm-location');
+                if (confirmLocBtnMasuk) { confirmLocBtnMasuk.innerText = 'Terverifikasi'; }
+            }, function (err) {
+                accEl.innerText = 'Akurasi: -';
+                alert('Gagal mendapatkan lokasi: ' + (err.message || 'unknown'));
+            }, {enableHighAccuracy: true, timeout: 10000});
         });
     </script>
 </body>
