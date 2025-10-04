@@ -69,6 +69,43 @@
         </div>
     </div>
 
+    <!-- Izin/Sakit Modal -->
+    <div id="modal-izin-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;z-index:45">
+        <div style="background:#fff;width:640px;max-width:96%;padding:22px;box-shadow:0 8px 30px rgba(0,0,0,0.2)">
+            <div style="text-align:center;margin-bottom:12px;font-size:20px;font-weight:600">Pilih Jenis Permohonan</div>
+            <div style="display:flex;gap:18px;justify-content:center;margin-bottom:12px">
+                <label style="display:flex;align-items:center;gap:8px;background:#f3f3f3;padding:16px;width:180px;justify-content:center;cursor:pointer">
+                    <input type="radio" name="izin_type" value="izin" checked />
+                    <div>Izin</div>
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;background:#f3f3f3;padding:16px;width:180px;justify-content:center;cursor:pointer">
+                    <input type="radio" name="izin_type" value="sakit" />
+                    <div>Sakit</div>
+                </label>
+            </div>
+
+            <div style="margin-bottom:8px">
+                <div style="font-size:12px;margin-bottom:6px">Tanggal</div>
+                <input type="date" id="izin-date" style="width:100%;padding:10px;border:1px solid #ddd" />
+            </div>
+
+            <div style="margin-bottom:8px">
+                <div style="font-size:12px;margin-bottom:6px">Alasan / Keterangan</div>
+                <textarea id="izin-reason" rows="5" style="width:100%;padding:10px;border:1px solid #ddd"></textarea>
+            </div>
+
+            <div style="margin-bottom:12px">
+                <div style="font-size:12px;margin-bottom:6px">Surat Keterangan (Optional)</div>
+                <input type="file" id="izin-file" />
+            </div>
+
+            <div style="display:flex;gap:18px;justify-content:center">
+                <button id="btn-submit-izin" style="padding:10px 18px">Ajukan Permohonan</button>
+                <button id="btn-cancel-izin" style="padding:10px 18px">Batal</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal -->
     <div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;z-index:40">
         <div id="modal" style="background:#fff;width:720px;max-width:92%;padding:22px;box-shadow:0 8px 30px rgba(0,0,0,0.2)">
@@ -246,6 +283,51 @@
                 alert('Gagal mendapatkan lokasi: ' + (err.message || 'unknown'));
             }, {enableHighAccuracy: true, timeout: 10000});
         });
+
+            // Izin/Sakit modal
+            const izinCard = document.querySelector('.card .card-label + .card-label, .card');
+            // open via the third card (Izin/Sakit)
+            const cards = document.querySelectorAll('.grid .card');
+            const izinCardEl = cards[2];
+            const izinOverlay = document.getElementById('modal-izin-overlay');
+            const btnCancelIzin = document.getElementById('btn-cancel-izin');
+            const btnSubmitIzin = document.getElementById('btn-submit-izin');
+
+            if (izinCardEl) {
+                izinCardEl.addEventListener('click', function () {
+                    izinOverlay.style.display = 'flex';
+                });
+            }
+
+            btnCancelIzin.addEventListener('click', function () {
+                izinOverlay.style.display = 'none';
+            });
+
+            btnSubmitIzin.addEventListener('click', function () {
+                const type = document.querySelector('input[name="izin_type"]:checked').value;
+                const date = document.getElementById('izin-date').value;
+                const reason = document.getElementById('izin-reason').value.trim();
+                const fileInput = document.getElementById('izin-file');
+                if (!date) { alert('Pilih tanggal'); return; }
+                if (!reason) { alert('Masukkan alasan atau keterangan'); return; }
+
+                const formData = new FormData();
+                formData.append('type', type);
+                formData.append('date', date);
+                formData.append('reason', reason);
+                if (fileInput.files[0]) { formData.append('file', fileInput.files[0]); }
+
+                fetch('/izin/request', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: formData
+                }).then(r => r.json()).then(data => {
+                    alert('Permohonan terkirim');
+                    izinOverlay.style.display = 'none';
+                }).catch(err => { alert('Gagal: ' + err); });
+            });
     </script>
 </body>
 </html>

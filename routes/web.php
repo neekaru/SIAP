@@ -43,3 +43,9 @@ Route::post('/absen/pulang', function (Request $request) {
         'data' => $request->all(),
     ]);
 });
+
+Route::post('/izin/request', function (Request $request) {
+    // Placeholder: store request and file
+    $data = $request->all();
+    return response()->json(['ok' => true, 'data' => $data]);
+});
