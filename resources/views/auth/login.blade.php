@@ -4,36 +4,46 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login - {{ $role }}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root{--bg:#dcdcdc;--card:#ffffff;--panel:#efefef;--text:#1a1a1a}
+        :root{--bg:#dcdcdc;--text:#1a1a1a}
         html,body{height:100%;margin:0;font-family:Arial, Helvetica, sans-serif;color:var(--text)}
         .page{height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg)}
-        .card{width:420px;padding:36px 40px;text-align:center;background:var(--card);box-shadow:0 2px 6px rgba(0,0,0,0.06)}
-        .logo{width:100px;height:60px;background:#e0e0e0;margin:0 auto 20px;display:flex;align-items:center;justify-content:center}
-        .form-row{margin:12px 0}
-        .input{display:block;width:80%;max-width:300px;margin:0 auto;padding:12px;background:var(--panel);border:0;border-radius:2px;text-align:center}
-        .submit{display:block;width: 100%;max-width:320px;margin:12px auto 0 auto;padding:12px;background:var(--panel);border:0;border-radius:2px;cursor:pointer}
-        h2{margin:0 0 18px;font-weight:500}
-        @media (max-width:480px){.card{width:90%;padding:24px}}
+        .custom-card{background:#ffffff;box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+        .logo-placeholder{width:100px;height:60px;background:#e0e0e0;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;border-radius:4px}
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .custom-card {
+                width: 95% !important;
+                margin: 0 auto;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="page">
-        <div class="card">
-            <div class="logo">LOGO</div>
-            <h2>Login {{ $role }}</h2>
-            <form method="POST" action="#">
-                <div class="form-row">
-                    <input type="email" name="email" placeholder="Email" class="input" />
-                </div>
-                <div class="form-row">
-                    <input type="password" name="password" placeholder="Password" class="input" />
-                </div>
-                <div class="form-row">
-                    <button type="submit" class="submit">LOGIN</button>
-                </div>
-            </form>
+        <div class="card custom-card border-0" style="width: 420px;">
+            <div class="card-body text-center p-4">
+                <div class="logo-placeholder">LOGO</div>
+                <h2 class="card-title mb-4 fw-normal">Login {{ $role }}</h2>
+                <form method="POST" action="#">
+                    <div class="mb-3">
+                        <input type="email" name="email" placeholder="Email" class="form-control form-control-lg text-center" />
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" name="password" placeholder="Password" class="form-control form-control-lg text-center" />
+                    </div>
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg w-100">LOGIN</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
