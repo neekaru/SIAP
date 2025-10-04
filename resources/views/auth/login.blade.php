@@ -20,11 +20,27 @@
                 margin: 0 auto;
             }
         }
+
+        /** Background image styles **/
+        .img-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('{{ asset('img/bg.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: blur(8px);
+            z-index: 0;
+        }
     </style>
 </head>
 <body>
     <div class="page">
-        <div class="card custom-card border-0" style="width: 420px;">
+        <div class="img-background"></div>
+        <div class="card custom-card border-0" style="width: 420px; z-index: 1; position: relative;">
             <div class="card-body text-center p-4">
                 <div class="logo-placeholder">LOGO</div>
                 <h2 class="card-title mb-4 fw-normal">Login {{ $role }}</h2>
