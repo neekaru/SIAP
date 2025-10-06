@@ -34,6 +34,19 @@ Route::get('/guru-dashboard/izin_sakit', [GuruDashboardController::class, 'izinS
 // Admin dashboard
 Route::get('/admin-dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
+// Admin - Manajemen Siswa
+Route::get('/admin-dashboard/siswa', function () {
+    return view('admin.siswa');
+})->name('admin.siswa');
+
+Route::get('/admin-dashboard/guru', function () {
+    return view('admin.guru');
+})->name('admin.guru');
+
+Route::get('/admin-dashboard/kelas', function () {
+    return view('admin.kelas');
+})->name('admin.kelas');
+
 // Simple endpoints to accept attendance confirmations (AJAX)
 use Illuminate\Http\Request;
 
