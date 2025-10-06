@@ -5,51 +5,11 @@ use App\Http\Controllers\GuruDashboardController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Auth\LoginController;
 
-Route::post('/login/{role}', function (Request $request, $role) {
-    $email = $request->email;
-    $password = $request->password;
-    $valid = false;
-    $roleLower = strtolower($role);
+Route::post('/login/{role}', [LoginController::class, 'login'])->name('login.post');
 
-    if ($roleLower == 'admin' && $email == 'admin@example.com' && $password == 'password') {
-        $valid = true;
-    } elseif ($roleLower == 'guru' && $email == 'guru@example.com' && $password == 'password') {
-        $valid = true;
-    } elseif ($roleLower == 'siswa' && $email == 'siswa@example.com' && $password == 'password') {
-        $valid = true;
-    }
-
-    if ($valid) {
-        $id = $roleLower == 'admin' ? 1 : ($roleLower == 'guru' ? 2 : 3);
-        $user = \App\Models\User::find($id);
-        if ($user) {
-            Auth::login($user);
-        } else {
-            $user = new \App\Models\User();
-            $user->id = $id;
-            $user->email = $email;
-            $user->name = ucfirst($roleLower);
-            $user->password = bcrypt('password');
-            $user->save();
-            Auth::login($user);
-        }
-        return redirect('/' . $roleLower . '-dashboard');
-    } else {
-        return back()->withErrors(['Invalid credentials']);
-    }
-})->name('login.post');
-
-Route::get('/login', function () {
-    $intended = session('url.intended', '/');
-    if (str_contains($intended, 'siswa')) {
-        return redirect('/login/siswa');
-    } elseif (str_contains($intended, 'guru')) {
-        return redirect('/login/guru');
-    } else {
-        return redirect('/login/admin');
-    }
-})->name('login');
+Route::get('/login', [LoginController::class, 'redirect'])->name('login');
 
 Route::get('/logout', function () {
     Auth::logout();
@@ -57,22 +17,18 @@ Route::get('/logout', function () {
 })->name('logout');
 
 
+Route::get('/login/{role}', [LoginController::class, 'show'])->whereIn('role', ['guru','siswa','admin']);
+
 Route::get('/', function () {
     return view('home');
 });
 
 // Login pages for different roles
-Route::get('/login/guru', function () {
-    return view('auth.login', ['role' => 'Guru']);
-})->name('login.guru');
+Route::get('/login/guru', [LoginController::class, 'show'])->name('login.guru')->defaults('role', 'Guru');
 
-Route::get('/login/siswa', function () {
-    return view('auth.login', ['role' => 'Siswa']);
-})->name('login.siswa');
+Route::get('/login/siswa', [LoginController::class, 'show'])->name('login.siswa')->defaults('role', 'Siswa');
 
-Route::get('/login/admin', function () {
-    return view('auth.login', ['role' => 'Admin']);
-})->name('login.admin');
+Route::get('/login/admin', [LoginController::class, 'show'])->name('login.admin')->defaults('role', 'Admin');
 
 // Siswa dashboard
 Route::get('/siswa-dashboard', function () {
