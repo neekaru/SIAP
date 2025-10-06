@@ -20,6 +20,17 @@ class GuruDashboardController extends Controller
             'belum_absen' => 24,
         ];
 
+        // Get today's attendance data for "Absen Hari ini" section
+        $today_attendance = [
+            ['nama' => 'Ahmad Santoso', 'nis' => '001', 'waktu' => '07:05', 'status' => 'Hadir'],
+            ['nama' => 'Siti Nurhaliza', 'nis' => '002', 'waktu' => '07:12', 'status' => 'Hadir'],
+            ['nama' => 'Dedi Kurnia', 'nis' => '005', 'waktu' => '07:20', 'status' => 'Hadir'],
+            ['nama' => 'Budi Santoso', 'nis' => '003', 'waktu' => '-', 'status' => 'Izin'],
+            ['nama' => 'Rina Wijaya', 'nis' => '004', 'waktu' => '-', 'status' => 'Alpa'],
+        ];
+
+        $data['today_attendance'] = $today_attendance;
+
         return response()->view('guru.dashboard', $data);
     }
 

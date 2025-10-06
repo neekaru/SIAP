@@ -84,21 +84,101 @@
         </div>
 
         <div class="actions">
-            <div class="action-btn">Data Kehadiran</div>
-            <div class="action-btn">Mengelola Izin dan Sakit</div>
+            <a href="{{ route('guru.kehadiran') }}" class="action-btn text-decoration-none text-dark">
+                Data Kehadiran
+            </a>
+            <a href="{{ route('guru.izin_sakit') }}" class="action-btn text-decoration-none text-dark">
+                Mengelola Izin dan Sakit
+            </a>
         </div>
 
-        <div class="big-action">Lihat Laporan Absensi</div>
+    <div class="big-action" id="open-report">Lihat Laporan Absensi</div>
 
         <div class="panel">
             <h5>Absen Hari ini</h5>
-            <div style="height:160px;border:1px dashed #eee;margin-top:12px;border-radius:6px;padding:12px;background:#fafafa">
-                <!-- Placeholder area for today's attendance list -->
-                <p class="text-muted">Tidak ada data yang ditampilkan.</p>
+            <div style="height:160px;border:1px dashed #eee;margin-top:12px;border-radius:6px;padding:12px;background:#fafafa;overflow-y:auto">
+                @forelse($today_attendance ?? [] as $attendance)
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #eee;font-size:14px;">
+                        <div>
+                            <strong>{{ $attendance['nama'] }}</strong><br>
+                            <small class="text-muted">NIS: {{ $attendance['nis'] }}</small>
+                        </div>
+                        <div style="text-align:right;">
+                            <span class="badge {{ $attendance['status'] == 'Hadir' ? 'bg-success' : ($attendance['status'] == 'Izin' ? 'bg-warning' : 'bg-danger') }}">
+                                {{ $attendance['status'] }}
+                            </span><br>
+                            <small class="text-muted">{{ $attendance['waktu'] != '-' ? $attendance['waktu'] : 'Tidak hadir' }}</small>
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-muted">Tidak ada data yang ditampilkan.</p>
+                @endforelse
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Report Modal -->
+        <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="reportModalLabel">Generate Laporan Absensi</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                                <div class="col-md-6">
+                                        <label class="form-label">Tanggal Mulai</label>
+                                        <input type="date" class="form-control" id="report-start" value="2025-09-25" />
+                                </div>
+                                <div class="col-md-6">
+                                        <label class="form-label">Tanggal Akhir</label>
+                                        <input type="date" class="form-control" id="report-end" value="2025-09-26" />
+                                </div>
+
+                                <div class="col-12">
+                                        <label class="form-label">Jenis laporan</label>
+                                        <select class="form-select" id="report-type">
+                                                <option value="harian">Laporan Harian</option>
+                                                <option value="mingguan">Laporan Mingguan</option>
+                                        </select>
+                                </div>
+
+                                <div class="col-12">
+                                        <label class="form-label">Format Laporan</label>
+                                        <select class="form-select" id="report-format">
+                                                <option value="pdf">PDF</option>
+                                                <option value="csv">CSV</option>
+                                        </select>
+                                </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" id="generate-report" class="btn btn-primary">Generate Laporan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+                (function(){
+                        const openBtn = document.getElementById('open-report');
+                        const reportModalEl = document.getElementById('reportModal');
+                        const reportModal = new bootstrap.Modal(reportModalEl);
+                        if (openBtn) openBtn.addEventListener('click', function(){ reportModal.show(); });
+
+                        document.getElementById('generate-report').addEventListener('click', function(){
+                                const start = document.getElementById('report-start').value;
+                                const end = document.getElementById('report-end').value;
+                                const type = document.getElementById('report-type').value;
+                                const format = document.getElementById('report-format').value;
+                                // For now just show an alert. In a real app you would POST and trigger download.
+                                alert('Generate laporan: ' + type + ' (' + start + ' - ' + end + ') format: ' + format);
+                                reportModal.hide();
+                        });
+                })();
+        </script>
 </body>
 </html>
