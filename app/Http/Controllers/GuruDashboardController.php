@@ -22,4 +22,21 @@ class GuruDashboardController extends Controller
 
         return response()->view('guru.dashboard', $data);
     }
+
+    /**
+     * Show the kehadiran (attendance) page for guru.
+     */
+    public function kehadiran(Request $request): \Illuminate\Http\Response
+    {
+        // Dummy attendance data (no database). Each row includes nama, nis, waktu, status
+        $kehadiran = [
+            ['nama' => 'Ahmad Santoso', 'nis' => '001', 'waktu' => '07:05', 'status' => 'Hadir'],
+            ['nama' => 'Siti Nurhaliza', 'nis' => '002', 'waktu' => '07:12', 'status' => 'Hadir'],
+            ['nama' => 'Budi Santoso', 'nis' => '003', 'waktu' => '-', 'status' => 'Izin'],
+            ['nama' => 'Rina Wijaya', 'nis' => '004', 'waktu' => '-', 'status' => 'Alpa'],
+            ['nama' => 'Dedi Kurnia', 'nis' => '005', 'waktu' => '07:20', 'status' => 'Hadir'],
+        ];
+
+        return response()->view('guru.kehadiran', ['kehadiran' => $kehadiran]);
+    }
 }

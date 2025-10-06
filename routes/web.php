@@ -27,6 +27,7 @@ Route::get('/siswa-dashboard', function () {
 
 // Guru dashboard
 Route::get('/guru-dashboard', [GuruDashboardController::class, 'index'])->name('guru.dashboard');
+Route::get('/guru-dashboard/kehadiran', [GuruDashboardController::class, 'kehadiran'])->name('guru.kehadiran');
 
 // Simple endpoints to accept attendance confirmations (AJAX)
 use Illuminate\Http\Request;
