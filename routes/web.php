@@ -1,7 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\GuruDashboardController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('home');
@@ -30,6 +31,9 @@ Route::get('/guru-dashboard', [GuruDashboardController::class, 'index'])->name('
 Route::get('/guru-dashboard/kehadiran', [GuruDashboardController::class, 'kehadiran'])->name('guru.kehadiran');
 Route::get('/guru-dashboard/izin_sakit', [GuruDashboardController::class, 'izinSakit'])->name('guru.izin_sakit');
 
+// Admin dashboard
+Route::get('/admin-dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+
 // Simple endpoints to accept attendance confirmations (AJAX)
 use Illuminate\Http\Request;
 
@@ -53,5 +57,6 @@ Route::post('/absen/pulang', function (Request $request) {
 Route::post('/izin/request', function (Request $request) {
     // Placeholder: store request and file
     $data = $request->all();
+
     return response()->json(['ok' => true, 'data' => $data]);
 });
