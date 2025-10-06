@@ -39,4 +39,19 @@ class GuruDashboardController extends Controller
 
         return response()->view('guru.kehadiran', ['kehadiran' => $kehadiran]);
     }
+
+    /**
+     * Show the izin / sakit management page for guru.
+     */
+    public function izinSakit(Request $request): \Illuminate\Http\Response
+    {
+        // Dummy izin/sakit data
+        $items = [
+            ['nama' => 'Budi Santoso', 'nis' => '003', 'tanggal' => '2025-10-03', 'jenis' => 'Izin', 'keterangan' => 'Acara keluarga'],
+            ['nama' => 'Rina Wijaya', 'nis' => '004', 'tanggal' => '2025-10-04', 'jenis' => 'Sakit', 'keterangan' => 'Demam tinggi'],
+            ['nama' => 'Dedi Kurnia', 'nis' => '005', 'tanggal' => '2025-10-05', 'jenis' => 'Izin', 'keterangan' => 'Kunjungan dokter'],
+        ];
+
+        return response()->view('guru.izin_sakit', ['items' => $items]);
+    }
 }
