@@ -7,6 +7,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Font Awesome Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
@@ -127,10 +129,9 @@
             </div>
 
             <div id="masuk-lokasi-live" class="mb-3 p-2 bg-white border rounded">
-                <div id="masuk-location-text" style="display: flex; align-items: center; gap: 12px;">
-                    <span>Lokasi Live <small style="margin-left:6px;">Lokasi sedang dilacak secara real-time</small></span>
-                    <span id="masuk-accuracy" style="margin-left:auto;">Akurasi: -</span>
-                </div>
+                <div id="masuk-location-text">Lokasi Live<br><small>Lokasi sedang dilacak secara real-time</small></div>
+                <div class="float-end"><span id="masuk-accuracy">Akurasi: -</span></div>
+                <div class="clearfix"></div>
             </div>
 
             <div class="border p-3 mb-3 rounded">
@@ -139,7 +140,7 @@
                 <div class="text-end mt-2"><button id="btn-confirm-location" class="btn btn-sm btn-outline-primary">Konfirmasi Lokasi</button></div>
             </div>
 
-            <div class="bg-light mb-3 rounded" id="maps" style="height:180px;display:flex;align-items:center;justify-content:center">Maps</div>
+            <div class="bg-light mb-3 rounded" id="map-masuk" style="height:180px;"></div>
           </div>
           <div class="modal-footer">
             <button id="btn-confirm-absen" type="button" class="btn btn-primary" disabled>Konfirmasi Absen Masuk</button>
@@ -176,7 +177,7 @@
                 <div class="text-end mt-2"><button id="btn-confirm-location-pulang" class="btn btn-sm btn-outline-primary">Konfirmasi Lokasi</button></div>
             </div>
 
-            <div class="bg-light mb-3 rounded" style="height:140px;display:flex;align-items:center;justify-content:center">Maps</div>
+            <div class="bg-light mb-3 rounded" id="map-pulang" style="height:140px;"></div>
           </div>
           <div class="modal-footer">
             <button id="btn-confirm-pulang" type="button" class="btn btn-primary" disabled>Konfirmasi Absen Pulang</button>
@@ -233,6 +234,8 @@
 
     <!-- Bootstrap JS bundle (includes Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
         // Update current time every second (guard element existence, start clock)
@@ -276,8 +279,19 @@
         });
 
         // Masuk modal logic
+        let mapMasuk;
         const btnConfirmLocationMasuk = document.getElementById('btn-confirm-location');
         const btnConfirmAbsenMasuk = document.getElementById('btn-confirm-absen');
+
+        // Initialize map when modal is shown
+        modalMasukEl.addEventListener('shown.bs.modal', function () {
+            if (!mapMasuk) {
+                mapMasuk = L.map('map-masuk').setView([-6.2, 106.816666], 13); // Default to Jakarta
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(mapMasuk);
+            }
+        });
 
         btnConfirmLocationMasuk.addEventListener('click', function () {
             if (!navigator.geolocation) {
@@ -288,13 +302,20 @@
             const locText = document.getElementById('masuk-location-text');
             accEl.innerText = 'Mencari posisi...';
             navigator.geolocation.getCurrentPosition(function (pos) {
-                const lat = pos.coords.latitude.toFixed(6);
-                const lon = pos.coords.longitude.toFixed(6);
-                const accuracy = Math.round(pos.coords.accuracy) + ' m';
-                accEl.innerText = 'Akurasi: ' + accuracy;
-                locText.innerHTML = 'Posisi: ' + lat + ', ' + lon + '<br><small>Lokasi berhasil didapatkan</small>';
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                const accuracy = pos.coords.accuracy;
+                const accuracyText = Math.round(accuracy) + ' m';
+                accEl.innerText = 'Akurasi: ' + accuracyText;
+                locText.innerHTML = 'Posisi: ' + lat.toFixed(6) + ', ' + lon.toFixed(6) + '<br><small>Lokasi berhasil didapatkan</small>';
                 if (btnConfirmAbsenMasuk) { btnConfirmAbsenMasuk.disabled = false; }
-                window._masukLocation = {lat: lat, lon: lon, accuracy: accuracy};
+                window._masukLocation = {lat: lat.toFixed(6), lon: lon.toFixed(6), accuracy: accuracyText};
+
+                // Update map
+                mapMasuk.setView([lat, lon], 16);
+                L.marker([lat, lon]).addTo(mapMasuk).bindPopup('Lokasi Anda').openPopup();
+                L.circle([lat, lon], {color: 'blue', fillColor: '#30f', fillOpacity: 0.2, radius: accuracy}).addTo(mapMasuk);
+
                 btnConfirmLocationMasuk.innerText = 'Terverifikasi';
             }, function (err) {
                 accEl.innerText = 'Akurasi: -';
@@ -318,8 +339,19 @@
         });
 
         // Pulang modal logic
+        let mapPulang;
         const btnConfirmLocationPulang = document.getElementById('btn-confirm-location-pulang');
         const btnConfirmPulang = document.getElementById('btn-confirm-pulang');
+
+        // Initialize map when modal is shown
+        modalPulangEl.addEventListener('shown.bs.modal', function () {
+            if (!mapPulang) {
+                mapPulang = L.map('map-pulang').setView([-6.2, 106.816666], 13); // Default to Jakarta
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(mapPulang);
+            }
+        });
 
         btnConfirmLocationPulang.addEventListener('click', function () {
             if (!navigator.geolocation) {
@@ -330,13 +362,20 @@
             const locText = document.getElementById('pulang-location-text');
             accEl.innerText = 'Mencari posisi...';
             navigator.geolocation.getCurrentPosition(function (pos) {
-                const lat = pos.coords.latitude.toFixed(6);
-                const lon = pos.coords.longitude.toFixed(6);
-                const accuracy = Math.round(pos.coords.accuracy) + ' m';
-                accEl.innerText = 'Akurasi: ' + accuracy;
-                locText.innerHTML = 'Posisi: ' + lat + ', ' + lon + '<br><small>Lokasi berhasil didapatkan</small>';
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                const accuracy = pos.coords.accuracy;
+                const accuracyText = Math.round(accuracy) + ' m';
+                accEl.innerText = 'Akurasi: ' + accuracyText;
+                locText.innerHTML = 'Posisi: ' + lat.toFixed(6) + ', ' + lon.toFixed(6) + '<br><small>Lokasi berhasil didapatkan</small>';
                 if (btnConfirmPulang) { btnConfirmPulang.disabled = false; }
-                window._pulangLocation = {lat: lat, lon: lon, accuracy: accuracy};
+                window._pulangLocation = {lat: lat.toFixed(6), lon: lon.toFixed(6), accuracy: accuracyText};
+
+                // Update map
+                mapPulang.setView([lat, lon], 16);
+                L.marker([lat, lon]).addTo(mapPulang).bindPopup('Lokasi Anda').openPopup();
+                L.circle([lat, lon], {color: 'blue', fillColor: '#30f', fillOpacity: 0.2, radius: accuracy}).addTo(mapPulang);
+
                 btnConfirmLocationPulang.innerText = 'Terverifikasi';
             }, function (err) {
                 accEl.innerText = 'Akurasi: -';
