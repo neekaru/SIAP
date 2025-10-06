@@ -44,7 +44,13 @@
             <div class="card-body text-center p-4">
                 <div class="logo-placeholder">LOGO</div>
                 <h2 class="card-title mb-4 fw-normal">Login {{ $role }}</h2>
-                <form method="POST" action="#">
+                 <form method="POST" action="{{ route('login.post', strtolower($role)) }}">
+                     @csrf
+                     @if ($errors->any())
+                         <div class="alert alert-danger">
+                             {{ $errors->first() }}
+                         </div>
+                     @endif
                     <div class="mb-3">
                         <input type="email" name="email" placeholder="Email" class="form-control form-control-lg text-center" />
                     </div>

@@ -57,7 +57,7 @@
                 <div class="d-flex align-items-center">
                     <span class="avatar d-flex align-items-center justify-content-center me-2" style="width:36px;height:36px;border-radius:50%;background:#efefef;">Img</span>
                     <span class="welcome me-3" style="line-height:1.2;">Selamat datang<br><strong>Nama Guru</strong></span>
-                    <a href="#" class="logout btn btn-outline-secondary btn-sm">Logout</a>
+                    <a href="{{ route('logout') }}" class="logout btn btn-outline-secondary btn-sm">Logout</a>
                 </div>
             </div>
         </nav>
