@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\GuruDashboardController;
 
 Route::get('/', function () {
     return view('home');
@@ -23,6 +24,9 @@ Route::get('/login/admin', function () {
 Route::get('/siswa-dashboard', function () {
     return view('siswa.dashboard');
 })->name('siswa.dashboard');
+
+// Guru dashboard
+Route::get('/guru-dashboard', [GuruDashboardController::class, 'index'])->name('guru.dashboard');
 
 // Simple endpoints to accept attendance confirmations (AJAX)
 use Illuminate\Http\Request;
