@@ -9,11 +9,25 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root{--panel:#ffffff;--muted:#cfcfcf;--accent:#f6f6f6;--text:#111}
-        html,body{height:100%;margin:0;font-family:Arial, Helvetica, sans-serif;color:var(--text);background:#e9e9e9}
+        html,body{height:100%;margin:0;font-family:Arial, Helvetica, sans-serif;color:var(--text);background:transparent}
         .wrap{min-height:100%;padding:28px}
         header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
         .brand{display:flex;align-items:center;gap:12px}
         .profile{display:flex;align-items:center;gap:12px}
+
+        .img-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('{{ asset('img/bg.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: blur(8px);
+            z-index: 0;
+        }
 
         .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:28px}
         .stat{background:#fff;padding:18px;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.06);text-align:left}
@@ -31,7 +45,8 @@
     </style>
 </head>
 <body>
-    <div class="wrap">
+    <div class="img-background"></div>
+    <div class="wrap" style="z-index: 1; position: relative">
         <nav class="navbar navbar-expand-lg navbar-light mb-4 rounded shadow-sm" style="padding: 0.75rem 1.5rem; background: #fff;">
             <div class="container-fluid">
                 <div class="d-flex align-items-center">
