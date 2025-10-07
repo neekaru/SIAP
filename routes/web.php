@@ -12,11 +12,8 @@ Route::post('/login/{role}', [LoginController::class, 'login'])->name('login.pos
 
 Route::get('/login', [LoginController::class, 'redirect'])->name('login');
 
-Route::get('/logout', function () {
-    Auth::logout();
-
-    return redirect('/');
-})->name('logout');
+Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout.post');
 
 Route::get('/login/{role}', [LoginController::class, 'show'])->whereIn('role', ['guru', 'siswa', 'admin']);
 

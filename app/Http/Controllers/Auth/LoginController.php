@@ -64,4 +64,29 @@ class LoginController extends Controller
 
         return back()->withErrors(['Invalid credentials']);
     }
+
+    // Logout handler that redirects users to their role-specific login
+    public function logout(Request $request)
+    {
+        $user = Auth::user();
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // If we can identify the user's role by id, redirect to matching login
+        if ($user) {
+            switch ($user->id) {
+                case 1:
+                    return redirect()->route('login.admin');
+                case 2:
+                    return redirect()->route('login.guru');
+                case 3:
+                    return redirect()->route('login.siswa');
+                default:
+                    return redirect('/');
+            }
+        }
+
+        return redirect('/');
+    }
 }
