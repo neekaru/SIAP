@@ -45,7 +45,7 @@ class SiswaSeeder extends Seeder
         ];
 
         foreach ($siswas as $siswaData) {
-            $user = User::firstOrCreate([
+            $user = User::updateOrCreate([
                 'email' => $siswaData['email'],
             ], [
                 'name' => $siswaData['name'],
@@ -54,7 +54,7 @@ class SiswaSeeder extends Seeder
                 'role' => 'siswa',
             ]);
 
-            DataSiswa::firstOrCreate([
+            DataSiswa::updateOrCreate([
                 'user_id' => $user->id,
             ], [
                 'nama' => $siswaData['nama'],

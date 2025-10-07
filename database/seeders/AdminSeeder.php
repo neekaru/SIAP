@@ -14,7 +14,7 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::firstOrCreate([
+        $user = User::updateOrCreate([
             'email' => 'admin@example.com',
         ], [
             'name' => 'Admin',
@@ -23,7 +23,7 @@ class AdminSeeder extends Seeder
             'role' => 'admin',
         ]);
 
-        DataAdmin::firstOrCreate([
+        DataAdmin::updateOrCreate([
             'user_id' => $user->id,
         ], [
             'nama' => 'Administrator',

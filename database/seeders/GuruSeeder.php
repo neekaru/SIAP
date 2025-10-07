@@ -36,7 +36,7 @@ class GuruSeeder extends Seeder
         ];
 
         foreach ($gurus as $guruData) {
-            $user = User::firstOrCreate([
+            $user = User::updateOrCreate([
                 'email' => $guruData['email'],
             ], [
                 'name' => $guruData['name'],
@@ -45,7 +45,7 @@ class GuruSeeder extends Seeder
                 'role' => 'guru',
             ]);
 
-            DataGuru::firstOrCreate([
+            DataGuru::updateOrCreate([
                 'user_id' => $user->id,
             ], [
                 'nip' => $guruData['nip'],

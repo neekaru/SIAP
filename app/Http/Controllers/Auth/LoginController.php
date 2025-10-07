@@ -12,11 +12,7 @@ class LoginController extends Controller
     // Show the role-specific login page
     public function show(Request $request, string $role)
     {
-        $roleLower = strtolower($role);
-        if ($roleLower === 'admin') {
-            return view('auth.login-admin');
-        }
-        $roleFormatted = ucfirst($roleLower);
+        $roleFormatted = ucfirst(strtolower($role));
 
         return view('auth.login', ['role' => $roleFormatted]);
     }
