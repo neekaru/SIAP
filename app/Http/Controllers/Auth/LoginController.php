@@ -12,7 +12,12 @@ class LoginController extends Controller
     // Show the role-specific login page
     public function show(Request $request, string $role)
     {
-        $roleFormatted = ucfirst(strtolower($role));
+        $roleLower = strtolower($role);
+        if ($roleLower === 'admin') {
+            return view('auth.login-admin');
+        }
+        $roleFormatted = ucfirst($roleLower);
+
         return view('auth.login', ['role' => $roleFormatted]);
     }
 
@@ -29,37 +34,21 @@ class LoginController extends Controller
         }
     }
 
-    // Handle POST /login/{role}: simple hardcoded auth logic as before
+    // Handle POST /login/{role}: authenticate user with database
     public function login(Request $request, string $role)
     {
-        $email = $request->email;
-        $password = $request->password;
-        $valid = false;
+        $credentials = $request->only('email', 'password');
         $roleLower = strtolower($role);
 
-        if ($roleLower == 'admin' && $email == 'admin@example.com' && $password == 'password') {
-            $valid = true;
-        } elseif ($roleLower == 'guru' && $email == 'guru@example.com' && $password == 'password') {
-            $valid = true;
-        } elseif ($roleLower == 'siswa' && $email == 'siswa@example.com' && $password == 'password') {
-            $valid = true;
-        }
-
-        if ($valid) {
-            $id = $roleLower == 'admin' ? 1 : ($roleLower == 'guru' ? 2 : 3);
-            $user = User::find($id);
-            if ($user) {
-                Auth::login($user);
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+            if ($user->role === $roleLower) {
+                return redirect('/'.$roleLower.'-dashboard');
             } else {
-                $user = new User();
-                $user->id = $id;
-                $user->email = $email;
-                $user->name = ucfirst($roleLower);
-                $user->password = bcrypt('password');
-                $user->save();
-                Auth::login($user);
+                Auth::logout();
+
+                return back()->withErrors(['Role mismatch']);
             }
-            return redirect('/' . $roleLower . '-dashboard');
         }
 
         return back()->withErrors(['Invalid credentials']);
@@ -73,18 +62,9 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // If we can identify the user's role by id, redirect to matching login
+        // If we can identify the user's role, redirect to matching login
         if ($user) {
-            switch ($user->id) {
-                case 1:
-                    return redirect()->route('login.admin');
-                case 2:
-                    return redirect()->route('login.guru');
-                case 3:
-                    return redirect()->route('login.siswa');
-                default:
-                    return redirect('/');
-            }
+            return redirect('/login/'.$user->role);
         }
 
         return redirect('/');
