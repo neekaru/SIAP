@@ -9,6 +9,8 @@ class DataAdmin extends Model
 {
     use HasFactory;
 
+    protected $table = 'data_admin';
+
     protected $fillable = [
         'user_id',
         'nama',
@@ -17,5 +19,10 @@ class DataAdmin extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->user && $this->user->role === 'admin';
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DataGuru;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 
@@ -42,6 +43,24 @@ class AdminDashboardController extends Controller implements HasMiddleware
     public function guru(Request $request): \Illuminate\Http\Response
     {
         return response()->view('admin.guru');
+    }
+
+    /**
+     * Show the form to create a new guru.
+     */
+    public function createGuru(Request $request): \Illuminate\Http\Response
+    {
+        return response()->view('admin.guru-create');
+    }
+
+    /**
+     * Show the form to edit an existing guru.
+     */
+    public function editGuru(Request $request, $id): \Illuminate\Http\Response
+    {
+        $guru = DataGuru::findOrFail($id);
+
+        return response()->view('admin.guru-edit', ['guru' => $guru]);
     }
 
     /**
