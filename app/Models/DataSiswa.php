@@ -9,6 +9,8 @@ class DataSiswa extends Model
 {
     use HasFactory;
 
+    protected $table = 'data_siswa';
+
     protected $fillable = [
         'nama',
         'user_id',

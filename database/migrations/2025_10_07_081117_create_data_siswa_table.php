@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('nis');
             $table->string('no_hp_ortu');
-            $table->foreignId('kelas_id')->constrained('data_kelas')->onDelete('set null');
+            $table->foreignId('kelas_id')->nullable()->constrained('data_kelas')->onDelete('set null');
             $table->timestamps();
         });
     }
