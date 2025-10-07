@@ -3,9 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
 
-class GuruDashboardController extends Controller
+class GuruDashboardController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            'guru',
+        ];
+    }
+
     /**
      * Show the guru dashboard.
      */

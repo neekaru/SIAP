@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\GuruDashboardController;
+use App\Http\Controllers\SiswaDashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -31,14 +32,12 @@ Route::get('/login/siswa', [LoginController::class, 'show'])->name('login.siswa'
 Route::get('/login/admin', [LoginController::class, 'show'])->name('login.admin')->defaults('role', 'Admin');
 
 // Siswa dashboard
-Route::get('/siswa-dashboard', function () {
-    return view('siswa.dashboard');
-})->name('siswa.dashboard')->middleware('auth');
+Route::get('/siswa-dashboard', [SiswaDashboardController::class, 'index'])->name('siswa.dashboard');
 
 // Guru dashboard
-Route::get('/guru-dashboard', [GuruDashboardController::class, 'index'])->name('guru.dashboard')->middleware('auth');
-Route::get('/guru-dashboard/kehadiran', [GuruDashboardController::class, 'kehadiran'])->name('guru.kehadiran')->middleware('auth');
-Route::get('/guru-dashboard/izin_sakit', [GuruDashboardController::class, 'izinSakit'])->name('guru.izin_sakit')->middleware('auth');
+Route::get('/guru-dashboard', [GuruDashboardController::class, 'index'])->name('guru.dashboard');
+Route::get('/guru-dashboard/kehadiran', [GuruDashboardController::class, 'kehadiran'])->name('guru.kehadiran');
+Route::get('/guru-dashboard/izin_sakit', [GuruDashboardController::class, 'izinSakit'])->name('guru.izin_sakit');
 
 // Admin dashboard
 Route::get('/admin-dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
