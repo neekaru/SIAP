@@ -125,10 +125,10 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <div class="p-3 mb-3 bg-light rounded">
+                <div class="p-3 mb-3 bg-light rounded text-center">
                 <div style="font-size:18px">Waktu Absen</div>
-                <div id="masuk-time" style="font-size:28px;font-weight:600;margin-top:8px">23:59 WIB</div>
-                <div class="text-muted" style="margin-top:6px">Wednesday, 24 September 2025</div>
+                <div id="masuk-time" style="font-size:28px;font-weight:600;margin-top:8px">--:-- WIB</div>
+                <div id="masuk-date" class="text-muted" style="margin-top:6px">--</div>
             </div>
 
             <div id="masuk-lokasi-live" class="mb-3 p-2 bg-white border rounded">
@@ -162,10 +162,10 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <div class="p-3 mb-3 bg-light rounded">
+            <div class="p-3 mb-3 bg-light rounded text-center">
                 <div style="font-size:18px">Waktu Absen Pulang</div>
-                <div id="pulang-time" style="font-size:28px;font-weight:600;margin-top:8px">16:30 WIB</div>
-                <div class="text-muted" style="margin-top:6px">Wednesday, 24 September 2025</div>
+                <div id="pulang-time" style="font-size:28px;font-weight:600;margin-top:8px">--:-- WIB</div>
+                <div id="pulang-date" class="text-muted" style="margin-top:6px">--</div>
             </div>
 
             <div id="pulang-lokasi-live" class="mb-3 p-2 bg-white border rounded">
@@ -435,6 +435,64 @@
                 modalIzin.hide();
             }).catch(err => { alert('Gagal: ' + err); });
         });
+
+        // Update masuk-time element with realtime clock (local time, HH:mm WIB)
+        const masukTimeEl = document.getElementById('masuk-time');
+        function updateMasukTime() {
+            if (!masukTimeEl) return;
+            const now = new Date();
+            const opts = { hour: '2-digit', minute: '2-digit', hour12: false };
+            let t = now.toLocaleTimeString('id-ID', opts);
+            t = t.replace(/\./g, ':');
+            masukTimeEl.innerText = t + ' WIB';
+        }
+        if (masukTimeEl) {
+            updateMasukTime();
+            setInterval(updateMasukTime, 1000);
+        }
+
+        // Update pulang-time element with realtime clock (local time, HH:mm WIB)
+        const pulangTimeEl = document.getElementById('pulang-time');
+        function updatePulangTime() {
+            if (!pulangTimeEl) return;
+            const now = new Date();
+            const opts = { hour: '2-digit', minute: '2-digit', hour12: false };
+            let t = now.toLocaleTimeString('id-ID', opts);
+            t = t.replace(/\./g, ':');
+            pulangTimeEl.innerText = t + ' WIB';
+        }
+        if (pulangTimeEl) {
+            updatePulangTime();
+            setInterval(updatePulangTime, 1000);
+        }
+
+        // Helper: format date in Indonesian -> "NamaHari, dd NamaBulan yyyy"
+        function formatIndoDate(date) {
+            const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+            const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+            const dayName = days[date.getDay()];
+            const d = date.getDate();
+            const m = months[date.getMonth()];
+            const y = date.getFullYear();
+            return `${dayName}, ${d.toString().padStart(2,'0')} ${m} ${y}`;
+        }
+
+        // Update both date displays
+        const masukDateEl = document.getElementById('masuk-date');
+        const pulangDateEl = document.getElementById('pulang-date');
+        function updateDates() {
+            const now = new Date();
+            const formatted = formatIndoDate(now);
+            if (masukDateEl) masukDateEl.innerText = formatted;
+            if (pulangDateEl) pulangDateEl.innerText = formatted;
+        }
+        // Call initially
+        updateDates();
+        // Also update when modals are shown so they reflect current date
+        if (modalMasukEl) modalMasukEl.addEventListener('shown.bs.modal', updateDates);
+        if (modalPulangEl) modalPulangEl.addEventListener('shown.bs.modal', updateDates);
+
+
     </script>
 </body>
 </html>
