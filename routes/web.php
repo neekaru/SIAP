@@ -7,6 +7,7 @@ use App\Http\Controllers\SiswaDashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http;
 
 Route::post('/login/{role}', [LoginController::class, 'login'])->name('login.post');
 
@@ -72,3 +73,52 @@ Route::post('/izin/request', function (Request $request) {
 
     return response()->json(['ok' => true, 'data' => $data]);
 });
+
+// Proxy endpoint to avoid CORS and rate-limit issues when calling ipapi.co from browser
+Route::get('/ip-location', function (Request $request) {
+    // Determine client IP (respect X-Forwarded-For if present)
+    $forwarded = $request->header('X-Forwarded-For');
+    $ip = $forwarded ? trim(explode(',', $forwarded)[0]) : $request->ip();
+    if ($ip === '::1') $ip = '127.0.0.1';
+
+    $cacheKey = 'ipapi_location_' . str_replace([':', '.'], '_', $ip);
+    $cached = cache()->get($cacheKey);
+    if ($cached) {
+        return response()->json(array_merge($cached, ['cached' => true, 'fetched_for_ip' => $ip]));
+    }
+
+    try {
+        // If IP looks like a private/local address, fall back to server-based lookup
+        $useClientIp = false;
+        if (filter_var($ip, FILTER_VALIDATE_IP)) {
+            // Detect common private ranges
+            if (!preg_match('/^(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168\.|127\.)/', $ip)) {
+                $useClientIp = true;
+            }
+        }
+
+        $url = $useClientIp ? "https://ipapi.co/{$ip}/json/" : 'https://ipapi.co/json/';
+        $res = Http::timeout(5)->get($url);
+        $status = $res->status();
+        $body = $res->body();
+
+        // If upstream tells us rate-limited, forward 429 and don't cache
+        if ($status === 429 || stripos($body, 'Too Many') !== false || stripos($body, 'too many') !== false) {
+            return response()->json(['error' => 'Upstream rate limited', 'detail' => $body], 429);
+        }
+
+        if ($res->ok()) {
+            $data = $res->json();
+            // Cache only when we have coordinates (avoid caching error pages)
+            if (!empty($data['latitude']) && !empty($data['longitude'])) {
+                cache()->put($cacheKey, $data, now()->addMinutes(5));
+            }
+            return response()->json(array_merge($data, ['fetched_for_ip' => $ip]));
+        }
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Proxy error', 'detail' => $e->getMessage()], 502);
+    }
+
+    return response()->json(['error' => 'Upstream error'], 502);
+});
+

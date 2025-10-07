@@ -310,7 +310,7 @@
                 const accuracy = pos.coords.accuracy;
                 const accuracyText = Math.round(accuracy) + ' m';
                 accEl.innerText = 'Akurasi: ' + accuracyText;
-                locText.innerHTML = 'Posisi: ' + lat.toFixed(6) + ', ' + lon.toFixed(6) + '<br><small>Lokasi berhasil didapatkan</small>';
+                locText.innerHTML = 'Posisi: ' + lat.toFixed(6) + ', ' + lon.toFixed(6) + '<br><small>Lokasi tervalidasi</small>';
                 if (btnConfirmAbsenMasuk) { btnConfirmAbsenMasuk.disabled = false; }
                 window._masukLocation = {lat: lat.toFixed(6), lon: lon.toFixed(6), accuracy: accuracyText};
 
@@ -319,7 +319,7 @@
                 L.marker([lat, lon]).addTo(mapMasuk).bindPopup('Lokasi Anda').openPopup();
                 L.circle([lat, lon], {color: 'blue', fillColor: '#30f', fillOpacity: 0.2, radius: accuracy}).addTo(mapMasuk);
 
-                btnConfirmLocationMasuk.innerText = 'Terverifikasi';
+                btnConfirmLocationMasuk.innerText = 'Lokasi tervalidasi';
             }, function (err) {
                 accEl.innerText = 'Akurasi: -';
                 alert('Gagal mendapatkan lokasi: ' + (err.message || 'unknown'));
@@ -370,7 +370,7 @@
                 const accuracy = pos.coords.accuracy;
                 const accuracyText = Math.round(accuracy) + ' m';
                 accEl.innerText = 'Akurasi: ' + accuracyText;
-                locText.innerHTML = 'Posisi: ' + lat.toFixed(6) + ', ' + lon.toFixed(6) + '<br><small>Lokasi berhasil didapatkan</small>';
+                locText.innerHTML = 'Posisi: ' + lat.toFixed(6) + ', ' + lon.toFixed(6) + '<br><small>Lokasi tervalidasi</small>';
                 if (btnConfirmPulang) { btnConfirmPulang.disabled = false; }
                 window._pulangLocation = {lat: lat.toFixed(6), lon: lon.toFixed(6), accuracy: accuracyText};
 
@@ -379,7 +379,7 @@
                 L.marker([lat, lon]).addTo(mapPulang).bindPopup('Lokasi Anda').openPopup();
                 L.circle([lat, lon], {color: 'blue', fillColor: '#30f', fillOpacity: 0.2, radius: accuracy}).addTo(mapPulang);
 
-                btnConfirmLocationPulang.innerText = 'Terverifikasi';
+                btnConfirmLocationPulang.innerText = 'Lokasi tervalidasi';
             }, function (err) {
                 accEl.innerText = 'Akurasi: -';
                 alert('Gagal mendapatkan lokasi: ' + (err.message || 'unknown'));
@@ -491,6 +491,123 @@
         // Also update when modals are shown so they reflect current date
         if (modalMasukEl) modalMasukEl.addEventListener('shown.bs.modal', updateDates);
         if (modalPulangEl) modalPulangEl.addEventListener('shown.bs.modal', updateDates);
+
+        // Realtime location tracking: try device geolocation first, fallback to IP-based lookup
+        let masukIntervalId = null;
+        let pulangIntervalId = null;
+        let markerMasuk = null, circleMasuk = null;
+        let markerPulang = null, circlePulang = null;
+
+        async function getIpLocation() {
+            try {
+                const res = await fetch('/ip-location');
+                if (!res.ok) throw new Error('IP lookup failed');
+                const j = await res.json();
+                if (!j || !j.latitude || !j.longitude) return null;
+                return {lat: parseFloat(j.latitude), lon: parseFloat(j.longitude), accuracy: 5000};
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function updateLocationOnUI(type, lat, lon, accuracy) {
+            const accText = accuracy ? (Math.round(accuracy) + ' m') : 'Akurasi: -';
+            if (type === 'masuk') {
+                const accEl = document.getElementById('masuk-accuracy');
+                const locText = document.getElementById('masuk-location-text');
+                if (accEl) accEl.innerText = 'Akurasi: ' + (accuracy ? Math.round(accuracy) + ' m' : '-');
+                if (locText) locText.innerHTML = 'Posisi: ' + lat.toFixed(6) + ', ' + lon.toFixed(6) + '<br><small>Lokasi tervalidasi</small>';
+                if (btnConfirmAbsenMasuk) btnConfirmAbsenMasuk.disabled = false;
+                window._masukLocation = {lat: lat.toFixed(6), lon: lon.toFixed(6), accuracy: Math.round(accuracy) + ' m'};
+                if (mapMasuk) {
+                    mapMasuk.setView([lat, lon], 16);
+                    if (markerMasuk) { markerMasuk.setLatLng([lat, lon]); } else { markerMasuk = L.marker([lat, lon]).addTo(mapMasuk).bindPopup('Lokasi Anda').openPopup(); }
+                    if (circleMasuk) { circleMasuk.setLatLng([lat, lon]).setRadius(accuracy || 50); } else { circleMasuk = L.circle([lat, lon], {color: 'blue', fillColor: '#30f', fillOpacity: 0.2, radius: accuracy || 50}).addTo(mapMasuk); }
+                }
+            } else if (type === 'pulang') {
+                const accEl = document.getElementById('pulang-accuracy');
+                const locText = document.getElementById('pulang-location-text');
+                if (accEl) accEl.innerText = 'Akurasi: ' + (accuracy ? Math.round(accuracy) + ' m' : '-');
+                if (locText) locText.innerHTML = 'Posisi: ' + lat.toFixed(6) + ', ' + lon.toFixed(6) + '<br><small>Lokasi tervalidasi</small>';
+                if (btnConfirmPulang) btnConfirmPulang.disabled = false;
+                window._pulangLocation = {lat: lat.toFixed(6), lon: lon.toFixed(6), accuracy: Math.round(accuracy) + ' m'};
+                if (mapPulang) {
+                    mapPulang.setView([lat, lon], 16);
+                    if (markerPulang) { markerPulang.setLatLng([lat, lon]); } else { markerPulang = L.marker([lat, lon]).addTo(mapPulang).bindPopup('Lokasi Anda').openPopup(); }
+                    if (circlePulang) { circlePulang.setLatLng([lat, lon]).setRadius(accuracy || 50); } else { circlePulang = L.circle([lat, lon], {color: 'blue', fillColor: '#30f', fillOpacity: 0.2, radius: accuracy || 50}).addTo(mapPulang); }
+                }
+            }
+        }
+
+        function startIpTracking(type, intervalMs) {
+            const fn = async () => {
+                const ipLoc = await getIpLocation();
+                if (ipLoc) {
+                    updateLocationOnUI(type, ipLoc.lat, ipLoc.lon, ipLoc.accuracy);
+                    if (type === 'masuk') { if (masukIntervalId == null) masukIntervalId = setInterval(fn, intervalMs); }
+                    if (type === 'pulang') { if (pulangIntervalId == null) pulangIntervalId = setInterval(fn, intervalMs); }
+                }
+            };
+            fn();
+        }
+
+        function startDeviceTracking(type, intervalMs) {
+            const options = { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 };
+            const fn = () => {
+                navigator.geolocation.getCurrentPosition(function (pos) {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+                    const accuracy = pos.coords.accuracy || 50;
+                    updateLocationOnUI(type, lat, lon, accuracy);
+                }, async function (err) {
+                    // On error (e.g., permission denied), fallback to IP-based tracking
+                    if (err && (err.code === err.PERMISSION_DENIED || err.code === err.POSITION_UNAVAILABLE)) {
+                        if (type === 'masuk' && masukIntervalId) { clearInterval(masukIntervalId); masukIntervalId = null; }
+                        if (type === 'pulang' && pulangIntervalId) { clearInterval(pulangIntervalId); pulangIntervalId = null; }
+                        startIpTracking(type, intervalMs);
+                    }
+                }, options);
+            };
+            // run immediately and then interval
+            fn();
+            if (type === 'masuk') { if (masukIntervalId == null) masukIntervalId = setInterval(fn, intervalMs); }
+            if (type === 'pulang') { if (pulangIntervalId == null) pulangIntervalId = setInterval(fn, intervalMs); }
+        }
+
+        function stopTracking(type) {
+            if (type === 'masuk') {
+                if (masukIntervalId) { clearInterval(masukIntervalId); masukIntervalId = null; }
+                if (markerMasuk && mapMasuk) { mapMasuk.removeLayer(markerMasuk); markerMasuk = null; }
+                if (circleMasuk && mapMasuk) { mapMasuk.removeLayer(circleMasuk); circleMasuk = null; }
+            } else if (type === 'pulang') {
+                if (pulangIntervalId) { clearInterval(pulangIntervalId); pulangIntervalId = null; }
+                if (markerPulang && mapPulang) { mapPulang.removeLayer(markerPulang); markerPulang = null; }
+                if (circlePulang && mapPulang) { mapPulang.removeLayer(circlePulang); circlePulang = null; }
+            }
+        }
+
+        // Start tracking when modals open, stop when close
+        if (modalMasukEl) {
+            modalMasukEl.addEventListener('shown.bs.modal', function () {
+                if (!mapMasuk) {
+                    mapMasuk = L.map('map-masuk').setView([-6.2, 106.816666], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(mapMasuk);
+                }
+                // prioritise device geolocation, fallback to IP, update every 3000ms
+                if (navigator.geolocation) startDeviceTracking('masuk', 3000); else startIpTracking('masuk', 3000);
+            });
+            modalMasukEl.addEventListener('hidden.bs.modal', function () { stopTracking('masuk'); });
+        }
+        if (modalPulangEl) {
+            modalPulangEl.addEventListener('shown.bs.modal', function () {
+                if (!mapPulang) {
+                    mapPulang = L.map('map-pulang').setView([-6.2, 106.816666], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(mapPulang);
+                }
+                if (navigator.geolocation) startDeviceTracking('pulang', 3000); else startIpTracking('pulang', 3000);
+            });
+            modalPulangEl.addEventListener('hidden.bs.modal', function () { stopTracking('pulang'); });
+        }
 
 
     </script>
