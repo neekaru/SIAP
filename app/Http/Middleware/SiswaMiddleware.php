@@ -16,7 +16,7 @@ class SiswaMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! Auth::check() || Auth::id() !== 3) {
+        if (! Auth::check() || Auth::user()->role !== 'siswa') {
             abort(403, 'Unauthorized');
         }
 

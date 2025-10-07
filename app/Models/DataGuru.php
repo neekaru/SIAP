@@ -28,4 +28,9 @@ class DataGuru extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function isGuru(): bool
+    {
+        return $this->user && $this->user->role === 'guru';
+    }
 }

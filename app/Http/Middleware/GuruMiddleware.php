@@ -16,7 +16,7 @@ class GuruMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! Auth::check() || Auth::id() !== 2) {
+        if (! Auth::check() || Auth::user()->role !== 'guru') {
             abort(403, 'Unauthorized');
         }
 

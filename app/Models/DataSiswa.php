@@ -26,4 +26,9 @@ class DataSiswa extends Model
     {
         return $this->belongsTo(DataKelas::class);
     }
+
+    public function isSiswa(): bool
+    {
+        return $this->user && $this->user->role === 'siswa';
+    }
 }
