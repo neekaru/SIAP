@@ -42,7 +42,7 @@
         <div class="img-background"></div>
         <div class="card custom-card border-0" style="width: 420px; z-index: 1; position: relative;">
             <div class="card-body text-center p-4">
-                <div class="logo-placeholder">LOGO</div>
+                <img src="{{ asset('img/logo.jpg') }}" alt="Logo" class="img-fluid" style="width:120px; height:auto; margin:0 auto 20px; display:block;">
                 <h2 class="card-title mb-4 fw-normal">Login {{ $role }}</h2>
                  <form method="POST" action="{{ route('login.post', strtolower($role)) }}">
                      @csrf
