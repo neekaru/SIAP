@@ -80,15 +80,15 @@
         </div>
 
         <div class="actions">
-            <p class="action-btn text-decoration-none text-dark" style="color:#000">
+            <a href="{{ route('admin.siswa') }}" class="action-btn text-decoration-none text-dark" style="color:#000">
             Manajemen Siswa
-            </p>
-            <p class="action-btn text-decoration-none text-dark" style="color:#000">
+            </a>
+            <a href="{{ route('admin.guru') }}" class="action-btn text-decoration-none text-dark" style="color:#000">
             Manajemen Guru
-            </p>
-            <p class="action-btn text-decoration-none text-dark" style="color:#000">
+            </a>
+            <a href="{{ route('admin.kelas') }}" class="action-btn text-decoration-none text-dark" style="color:#000">
             Manajemen Kelas
-            </p>
+            </a>
         </div>
         <div class="w-100 d-flex justify-content-center">
             <button type="button" class="action-btn text-decoration-none text-dark w-100" style="border:none;background:#fff;" data-bs-toggle="modal" data-bs-target="#laporanModal">

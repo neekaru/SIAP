@@ -1,11 +1,11 @@
 <?php
 
 use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\GuruDashboardController;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\GuruDashboardController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 Route::post('/login/{role}', [LoginController::class, 'login'])->name('login.post');
 
@@ -13,11 +13,11 @@ Route::get('/login', [LoginController::class, 'redirect'])->name('login');
 
 Route::get('/logout', function () {
     Auth::logout();
+
     return redirect('/');
 })->name('logout');
 
-
-Route::get('/login/{role}', [LoginController::class, 'show'])->whereIn('role', ['guru','siswa','admin']);
+Route::get('/login/{role}', [LoginController::class, 'show'])->whereIn('role', ['guru', 'siswa', 'admin']);
 
 Route::get('/', function () {
     return view('home');
@@ -41,20 +41,16 @@ Route::get('/guru-dashboard/kehadiran', [GuruDashboardController::class, 'kehadi
 Route::get('/guru-dashboard/izin_sakit', [GuruDashboardController::class, 'izinSakit'])->name('guru.izin_sakit')->middleware('auth');
 
 // Admin dashboard
-Route::get('/admin-dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard')->middleware('auth');
+Route::get('/admin-dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
 // Admin - Manajemen Siswa
-Route::get('/admin-dashboard/siswa', function () {
-    return view('admin.siswa');
-})->name('admin.siswa')->middleware('auth');
+Route::get('/admin-dashboard/siswa', [AdminDashboardController::class, 'siswa'])->name('admin.siswa');
 
-Route::get('/admin-dashboard/guru', function () {
-    return view('admin.guru');
-})->name('admin.guru')->middleware('auth');
+// Admin - Manajemen Guru
+Route::get('/admin-dashboard/guru', [AdminDashboardController::class, 'guru'])->name('admin.guru');
 
-Route::get('/admin-dashboard/kelas', function () {
-    return view('admin.kelas');
-})->name('admin.kelas')->middleware('auth');
+// Admin - Manajemen Kelas
+Route::get('/admin-dashboard/kelas', [AdminDashboardController::class, 'kelas'])->name('admin.kelas');
 
 // Simple endpoints to accept attendance confirmations (AJAX)
 Route::post('/absen/masuk', function (Request $request) {
