@@ -77,7 +77,7 @@
                     <div class="d-flex align-items-center">
                         <span class="status-dot me-2" style="width:14px;height:14px;border-radius:50%;background:#2ecc40;display:inline-block"></span>
                         <span class="fw-semibold">Belum Absen</span>
-                        <span class="mx-3 text-muted">Tanggal Hari ini</span>
+                        <span class="mx-3 text-muted" id="tanggal-hari"></span>
                     </div>
                 </div>
                 <div class="fs-5" id="current-time">
@@ -258,6 +258,27 @@
             if (timeEl) {
                 timeEl.innerText = 'Jam Hari ini : ' + timeString + ' WIB';
             }
+        }
+
+        // Function to format date in Indonesian
+        function formatIndonesianDate(date) {
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                           'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            const dayName = days[date.getDay()];
+            const day = date.getDate();
+            const monthName = months[date.getMonth()];
+            const year = date.getFullYear();
+            
+            return `${dayName}, ${day} ${monthName} ${year}`;
+        }
+
+        // Update tanggal-hari element with current date in Indonesian format
+        const tanggalHariEl = document.getElementById('tanggal-hari');
+        if (tanggalHariEl) {
+            const now = new Date();
+            tanggalHariEl.innerText = formatIndonesianDate(now);
         }
 
         // Start the clock only when the element exists
