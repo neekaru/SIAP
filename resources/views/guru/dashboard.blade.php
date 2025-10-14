@@ -41,6 +41,7 @@
         .big-action{background:#fff;padding:18px;border-radius:8px;text-align:center;font-size:20px;margin-bottom:20px}
 
         .panel{background:#fff;padding:18px;border-radius:8px;min-height:220px}
+        .table-wrap{background:#fff;padding:16px;border-radius:6px}
 
         @media (max-width:900px){.stats-grid{grid-template-columns:repeat(1,1fr)}.actions{grid-template-columns:repeat(1,1fr)}}
     </style>
@@ -50,60 +51,67 @@
     <div class="wrap" style="z-index: 1; position: relative">
         @include('guru.header-guru')
 
-        <h2 class="mb-4 text-white">Dashboard Guru</h2>
+        <div class="table-wrap">
+            <h2 class="mb-4 ps-3">Dashboard Guru</h2>
 
         <div class="stats-grid">
-            <div class="stat">
-                <div class="stat-icon text-primary bg-primary-subtle">
+            <div class="stat" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); color: white;">
+                <div class="stat-icon text-white">
                     <i class="bi bi-people-fill"></i>
                 </div>
                 <div>
-                    <div class="label">Total Siswa</div>
+                    <div class="label text-white">Total Siswa</div>
                     <div class="value">{{ $total_siswa ?? '-' }}</div>
                 </div>
             </div>
-            <div class="stat">
-                <div class="stat-icon text-success bg-success-subtle">
+            <div class="stat" style="background: linear-gradient(135deg, #198754 0%, #146c43 100%); color: white;">
+                <div class="stat-icon text-white">
                     <i class="bi bi-person-check-fill"></i>
                 </div>
                 <div>
-                    <div class="label">Hadir</div>
+                    <div class="label text-white">Hadir</div>
                     <div class="value">{{ $hadir ?? '-' }}</div>
                 </div>
             </div>
-            <div class="stat">
-                <div class="stat-icon text-warning bg-warning-subtle">
+            <div class="stat" style="background: linear-gradient(135deg, #fd7e14 0%, #d26e04 100%); color: white;">
+                <div class="stat-icon text-white">
                     <i class="bi bi-emoji-expressionless-fill"></i>
                 </div>
                 <div>
-                    <div class="label">Izin/Sakit</div>
+                    <div class="label text-white">Izin/Sakit</div>
                     <div class="value">{{ $izin_sakit ?? '-' }}</div>
                 </div>
             </div>
-            <div class="stat">
-                <div class="stat-icon text-danger bg-danger-subtle">
+            <div class="stat" style="background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%); color: white;">
+                <div class="stat-icon text-white">
                     <i class="bi bi-question-circle-fill"></i>
                 </div>
                 <div>
-                    <div class="label">Belum Absen</div>
+                    <div class="label text-white">Belum Absen</div>
                     <div class="value">{{ $belum_absen ?? '-' }}</div>
                 </div>
             </div>
         </div>
+    </div>
+    <br />
+    <div class="actions">
+        <a href="{{ route('guru.kehadiran') }}" class="action-btn text-decoration-none text-dark">
+            <i class="fa-solid fa-calendar-check me-2"></i>
+            Data Kehadiran
+        </a>
+        <a href="{{ route('guru.izin_sakit') }}" class="action-btn text-decoration-none text-dark">
+            <i class="fa-solid fa-file-medical me-2"></i>
+            Mengelola Izin dan Sakit
+        </a>
+    </div>
 
-        <div class="actions">
-            <a href="{{ route('guru.kehadiran') }}" class="action-btn text-decoration-none text-dark">
-                Data Kehadiran
-            </a>
-            <a href="{{ route('guru.izin_sakit') }}" class="action-btn text-decoration-none text-dark">
-                Mengelola Izin dan Sakit
-            </a>
-        </div>
-
-    <div class="big-action" id="open-report">Lihat Laporan Absensi</div>
+    <div class="big-action" id="open-report">
+        <i class="fa-solid fa-file-lines me-2"></i>
+        Lihat Laporan Absensi
+    </div>
 
         <div class="panel">
-            <h5>Absen Hari ini</h5>
+            <h5><i class="fa-solid fa-calendar-day me-2"></i>Absen Hari ini</h5>
             <div style="height:160px;border:1px dashed #eee;margin-top:12px;border-radius:6px;padding:12px;background:#fafafa;overflow-y:auto">
                 @forelse($today_attendance ?? [] as $attendance)
                     <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #eee;font-size:14px;">
@@ -122,6 +130,7 @@
                     <p class="text-muted">Tidak ada data yang ditampilkan.</p>
                 @endforelse
             </div>
+        </div>
         </div>
     </div>
 
