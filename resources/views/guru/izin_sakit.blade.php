@@ -25,8 +25,8 @@
         .navbar-brand-logo{width:64px;height:64px;object-fit:cover;border-radius:.75rem}
         .navbar-user-text{line-height:1.2}
         .section-title{color:#fff}
-        .table-card{border-radius:18px;overflow:hidden;box-shadow:0 10px 25px rgba(15,23,42,0.08)}
-        .table-card .card-header{background:linear-gradient(90deg,#ec4899,#a855f7);color:#fff}
+        .table-card{overflow:hidden;box-shadow:0 10px 25px rgba(15,23,42,0.08)}
+        .table-card .card-header{background:linear-gradient(90deg,#10b981,#059669);color:#fff}
         .table-card .table thead th{background:#f8f9fa;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;color:#475569}
         .table-card .table tbody td{vertical-align:middle}
     </style>
@@ -124,5 +124,39 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle Tolak button clicks
+            document.querySelectorAll('.btn-outline-danger').forEach(button => {
+                if (button.textContent.trim() === 'Tolak') {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        Swal.fire({
+                            title: 'Konfirmasi',
+                            text: 'Apakah anda ingin menolak?',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#dc3545',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: 'Ya, Tolak',
+                            cancelButtonText: 'Batal'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Here you can add the logic to reject the request
+                                // For now, just show success message
+                                Swal.fire(
+                                    'Berhasil!',
+                                    'Permohonan telah ditolak.',
+                                    'success'
+                                );
+                            }
+                        });
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>

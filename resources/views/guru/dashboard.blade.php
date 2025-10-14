@@ -74,7 +74,7 @@
             </div>
         </nav>
 
-        <h2 class="mb-4">Dashboard Guru</h2>
+        <h2 class="mb-4 text-white">Dashboard Guru</h2>
 
         <div class="stats-grid">
             <div class="stat">
