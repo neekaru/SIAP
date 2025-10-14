@@ -54,21 +54,21 @@
             </div>
         </nav>
 
-        <h2 class="mb-4 text-white">Manajemen Siswa</h2>
-
+        
         <div class="table-wrap">
-            <div class="d-flex justify-content-end mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="mb-0">Manajemen Siswa</h2>
                 <a href="#" class="btn btn-primary">Tambah Siswa</a>
             </div>
 
             <table class="data">
                 <thead>
                     <tr>
-                        <th style="width:60px">NO</th>
+                        <th class="text-center" style="width:60px">NO</th>
                         <th>Nama</th>
                         <th style="width:160px">NIS</th>
                         <th style="width:220px">Email</th>
-                        <th style="width:180px">Action</th>
+                        <th class="text-center" style="width:180px">Action</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -17,6 +17,7 @@
         table.data{width:100%;border-collapse:collapse}
         table.data th, table.data td{border:2px solid #222;padding:8px;text-align:left}
         table.data th{background:#f5f5f5}
+    .col-jumlah{width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .actions .btn{margin-right:8px}
         @media (max-width:900px){ .table-wrap{overflow:auto} }
     </style>
@@ -42,21 +43,21 @@
             </div>
         </nav>
 
-        <h2 class="mb-4 text-white">Manajemen Kelas</h2>
-
+        
         <div class="table-wrap">
-            <div class="d-flex justify-content-end mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="mb-0">Manajemen Kelas</h2>
                 <a href="#" class="btn btn-primary">Tambah Kelas</a>
             </div>
 
             <table class="data">
                 <thead>
                     <tr>
-                        <th style="width:60px">NO</th>
+                        <th class="text-center" style="width:60px">NO</th>
                         <th>Kelas</th>
                         <th>Guru</th>
-                        <th style="width:120px">Jumlah Siswa</th>
-                        <th style="width:180px">Action</th>
+                        <th class="col-jumlah">Jumlah Siswa</th>
+                        <th class="text-center" style="width:180px">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -65,7 +66,7 @@
                             <td>{{ $i + 1 }}</td>
                             <td>{{ $row['kelas'] ?? '-' }}</td>
                             <td>{{ $row['guru'] ?? '-' }}</td>
-                            <td>{{ $row['jumlah_siswa'] ?? '-' }}</td>
+                            <td class="col-jumlah">{{ $row['jumlah_siswa'] ?? '-' }}</td>
                             <td>
                                 <div class="d-flex gap-2">
                                     <button class="btn btn-sm btn-outline-primary">Edit</button>
