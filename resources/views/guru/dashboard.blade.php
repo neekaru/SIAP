@@ -7,14 +7,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         :root{--panel:#ffffff;--muted:#cfcfcf;--accent:#f6f6f6;--text:#111}
         html,body{height:100%;margin:0;font-family:Arial, Helvetica, sans-serif;color:var(--text);background:transparent}
         .wrap{min-height:100%;padding:28px}
-        header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-        .brand{display:flex;align-items:center;gap:12px}
-        .profile{display:flex;align-items:center;gap:12px}
-
         .img-background {
             position: absolute;
             top: 0;
@@ -29,8 +26,12 @@
             z-index: 0;
         }
 
+        .navbar-avatar{width:36px;height:36px;border-radius:50%;background:#efefef;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.875rem}
+        .navbar-brand-logo{width:64px;height:64px;object-fit:cover;border-radius:.75rem}
+        .navbar-user-text{line-height:1.2}
         .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:28px}
-        .stat{background:#fff;padding:18px;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.06);text-align:left}
+        .stat{background:#fff;padding:18px;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.06);text-align:left;display:flex;align-items:center;gap:16px}
+        .stat-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px}
         .stat .label{font-size:14px;color:#333}
         .stat .value{font-size:28px;font-weight:600;margin-top:6px}
 
@@ -47,20 +48,28 @@
 <body>
     <div class="img-background"></div>
     <div class="wrap" style="z-index: 1; position: relative">
-        <nav class="navbar navbar-expand-lg navbar-light mb-4 rounded shadow-sm" style="padding: 0.75rem 1.5rem; background: #fff;">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white mb-4 shadow-sm rounded-3 px-4 py-3">
             <div class="container-fluid">
-                <div class="d-flex align-items-center">
-                    <img src="{{ asset('img/logo.jpg') }}" alt="Logo" class="me-2" style="width:64px; height:64px; border-radius:8px; object-fit:cover; display:inline-block;">
-                    <span class="mx-2"></span>
-                    <span class="school fs-5">{{ strtoupper(env('NAMA_SEKOLAH')) }}</span>
-                </div>
-                <div class="d-flex align-items-center">
-                    <span class="avatar d-flex align-items-center justify-content-center me-2" style="width:36px;height:36px;border-radius:50%;background:#efefef;">Img</span>
-                    <span class="welcome me-3" style="line-height:1.2;">Selamat datang<br><strong>Nama Guru</strong></span>
-                    <form method="POST" action="{{ route('logout.post') }}" style="display:inline">
-                        @csrf
-                        <button type="submit" class="logout btn btn-outline-secondary btn-sm">Logout</button>
-                    </form>
+                <span class="navbar-brand d-flex align-items-center gap-3">
+                    <img src="{{ asset('img/logo.jpg') }}" alt="Logo sekolah" class="navbar-brand-logo">
+                    <span class="school fs-5 text-uppercase fw-semibold">{{ strtoupper(env('NAMA_SEKOLAH')) }}</span>
+                </span>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#guruNavbar" aria-controls="guruNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="guruNavbar">
+                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-3">
+                        <li class="nav-item d-flex align-items-center">
+                            <span class="navbar-avatar me-2">Img</span>
+                            <span class="navbar-text navbar-user-text m-0 text-secondary text-start text-lg-end">Selamat datang<br><strong class="text-dark">Nama Guru</strong></span>
+                        </li>
+                        <li class="nav-item">
+                            <form method="POST" action="{{ route('logout.post') }}">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">Logout</button>
+                            </form>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </nav>
@@ -69,20 +78,40 @@
 
         <div class="stats-grid">
             <div class="stat">
-                <div class="label">Total Siswa</div>
-                <div class="value">{{ $total_siswa ?? '-' }}</div>
+                <div class="stat-icon text-primary bg-primary-subtle">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div>
+                    <div class="label">Total Siswa</div>
+                    <div class="value">{{ $total_siswa ?? '-' }}</div>
+                </div>
             </div>
             <div class="stat">
-                <div class="label">Hadir</div>
-                <div class="value">{{ $hadir ?? '-' }}</div>
+                <div class="stat-icon text-success bg-success-subtle">
+                    <i class="bi bi-person-check-fill"></i>
+                </div>
+                <div>
+                    <div class="label">Hadir</div>
+                    <div class="value">{{ $hadir ?? '-' }}</div>
+                </div>
             </div>
             <div class="stat">
-                <div class="label">Izin/Sakit</div>
-                <div class="value">{{ $izin_sakit ?? '-' }}</div>
+                <div class="stat-icon text-warning bg-warning-subtle">
+                    <i class="bi bi-emoji-expressionless-fill"></i>
+                </div>
+                <div>
+                    <div class="label">Izin/Sakit</div>
+                    <div class="value">{{ $izin_sakit ?? '-' }}</div>
+                </div>
             </div>
             <div class="stat">
-                <div class="label">Belum Absen</div>
-                <div class="value">{{ $belum_absen ?? '-' }}</div>
+                <div class="stat-icon text-danger bg-danger-subtle">
+                    <i class="bi bi-question-circle-fill"></i>
+                </div>
+                <div>
+                    <div class="label">Belum Absen</div>
+                    <div class="value">{{ $belum_absen ?? '-' }}</div>
+                </div>
             </div>
         </div>
 

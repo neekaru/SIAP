@@ -44,6 +44,22 @@
         .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
         .card{background:var(--accent);padding:28px;text-align:center}
         .card .icon-outer{width:80px;height:80px;border-radius:50%;background:#e9e9e9;margin:0 auto 18px;display:flex;align-items:center;justify-content:center}
+
+        /* Individual card colors */
+        #card-absen-masuk {
+            background: #198754;
+            color: white;
+        }
+        #card-absen-pulang {
+            background: #fd7e14;
+            color: white;
+        }
+        #card-izin {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        /* Icon backgrounds for better contrast */
         .card-label{margin-top:6px}
 
         @media (max-width:900px){.grid{grid-template-columns:repeat(1,1fr)}}
@@ -90,7 +106,7 @@
             <div class="card shadow-sm p-3" id="card-absen-masuk" role="button">
                 <div class="d-flex flex-column align-items-center justify-content-center h-100">
                     <div class="icon-outer mb-2">
-                        <i class="fa-solid fa-door-open fa-2x text-success"></i>
+                        <i class="fa-solid fa-door-open fa-2x" style="color: #198754;"></i>
                     </div>
                     <div class="card-label">Absen Masuk</div>
                 </div>
@@ -98,7 +114,7 @@
             <div class="card shadow-sm p-3" id="card-absen-pulang" role="button">
                 <div class="d-flex flex-column align-items-center justify-content-center h-100">
                     <div class="icon-outer mb-2">
-                        <i class="fa-solid fa-door-closed fa-2x text-primary"></i>
+                        <i class="fa-solid fa-door-closed fa-2x" style="color: #fd7e14;"></i>
                     </div>
                     <div class="card-label">Absen Pulang</div>
                 </div>
@@ -106,7 +122,7 @@
             <div class="card shadow-sm p-3" id="card-izin" role="button">
                 <div class="d-flex flex-column align-items-center justify-content-center h-100">
                     <div class="icon-outer mb-2">
-                        <i class="fa-solid fa-notes-medical fa-2x text-warning"></i>
+                        <i class="fa-solid fa-notes-medical fa-2x" style="color: #ffc107;"></i>
                     </div>
                     <div class="card-label">Izin/Sakit</div>
                 </div>
@@ -125,11 +141,11 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-                <div class="p-3 mb-3 bg-light rounded text-center">
-                <div style="font-size:18px">Waktu Absen</div>
-                <div id="masuk-time" style="font-size:28px;font-weight:600;margin-top:8px">--:-- WIB</div>
-                <div id="masuk-date" class="text-muted" style="margin-top:6px">--</div>
-            </div>
+                <div class="p-3 mb-3 rounded text-center" style="background: linear-gradient(135deg, #198754, #157347); color: white;">
+                    <div style="font-size:18px; opacity: 0.9;">Waktu Absen Masuk</div>
+                    <div id="masuk-time" style="font-size:28px;font-weight:600;margin-top:8px; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">--:-- WIB</div>
+                    <div id="masuk-date" class="text-white" style="margin-top:6px; opacity: 0.9;">--</div>
+                </div>
 
             <div id="masuk-lokasi-live" class="mb-3 p-2 bg-white border rounded">
                 <div id="masuk-location-text">Lokasi Live<br><small>Lokasi sedang dilacak secara real-time</small></div>
@@ -162,10 +178,10 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <div class="p-3 mb-3 bg-light rounded text-center">
-                <div style="font-size:18px">Waktu Absen Pulang</div>
-                <div id="pulang-time" style="font-size:28px;font-weight:600;margin-top:8px">--:-- WIB</div>
-                <div id="pulang-date" class="text-muted" style="margin-top:6px">--</div>
+            <div class="p-3 mb-3 rounded text-center" style="background: linear-gradient(135deg, #fd7e14, #e96500); color: white;">
+                <div style="font-size:18px; opacity: 0.9;">Waktu Absen Pulang</div>
+                <div id="pulang-time" style="font-size:28px;font-weight:600;margin-top:8px; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">--:-- WIB</div>
+                <div id="pulang-date" class="text-white" style="margin-top:6px; opacity: 0.9;">--</div>
             </div>
 
             <div id="pulang-lokasi-live" class="mb-3 p-2 bg-white border rounded">
@@ -199,16 +215,21 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <div class="text-center mb-3 fw-semibold">Pilih Jenis Permohonan</div>
+            <!-- Header Section -->
+            <h5 class="text-center mb-4">Pilih Jenis Permohonan</h5>
 
-            <div class="d-flex gap-2 justify-content-center mb-3">
-                <label class="d-flex align-items-center gap-2 bg-light p-2 rounded" style="width:160px;justify-content:center;cursor:pointer">
-                    <input type="radio" name="izin_type" value="izin" checked />
-                    <div>Izin</div>
+            <!-- Radio Button Group (Bootstrap button-style radios with spacing) -->
+            <div class="d-flex justify-content-center mb-4 gap-2" role="group" aria-label="Jenis Permohonan">
+                <input type="radio" class="btn-check" name="izin_type" id="izin" value="izin" checked>
+                <label class="btn btn-outline-primary d-flex align-items-center gap-2" for="izin">
+                    <i class="fa-solid fa-calendar-day"></i>
+                    <span>Izin</span>
                 </label>
-                <label class="d-flex align-items-center gap-2 bg-light p-2 rounded" style="width:160px;justify-content:center;cursor:pointer">
-                    <input type="radio" name="izin_type" value="sakit" />
-                    <div>Sakit</div>
+
+                <input type="radio" class="btn-check" name="izin_type" id="sakit" value="sakit">
+                <label class="btn btn-outline-danger d-flex align-items-center gap-2" for="sakit">
+                    <i class="fa-solid fa-head-side-cough"></i>
+                    <span>Sakit</span>
                 </label>
             </div>
 
