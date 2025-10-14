@@ -41,42 +41,50 @@
 
     .report-btn{background:#fff;padding:22px;border-radius:10px;text-align:center;font-size:20px;margin:18px 0;box-shadow:0 6px 18px rgba(0,0,0,0.06);cursor:pointer}
 
-        .panel{background:#fff;padding:18px;border-radius:8px;min-height:220px}
-
-        @media (max-width:900px){.stats-grid{grid-template-columns:repeat(1,1fr)}.actions{grid-template-columns:repeat(1,1fr)}}
+    .panel{background:#fff;padding:18px;border-radius:8px;min-height:220px}
+    .table-wrap{background:#fff;padding:16px;border-radius:6px}
+    @media (max-width:900px){.stats-grid{grid-template-columns:repeat(1,1fr)}.actions{grid-template-columns:repeat(1,1fr)}}
     </style>
 </head>
 <body>
     <div class="img-background"></div>
-    <div class="wrap" style="z-index: 1; position: relative">
+    <div class="wrap container-fluid" style="z-index: 1; position: relative">
     @include('admin.header-admin')
 
-    <h2 class="mb-4 text-white">Dashboard Admin</h2>
-
-        <div class="stats-grid">
-            <div class="stat">
-                <div class="stat-logo"><i class="fa-solid fa-user-graduate"></i></div>
-                <div>
-                    <div class="label">Total Siswa</div>
-                    <div class="value">{{ $total_siswa ?? '-' }}</div>
+    <div class="table-wrap">
+        <h2 class="mb-4 ps-3">Dashboard Admin</h2>
+            <div class="stats-grid" style="background:#f6f6f6; border-radius:22px;">
+                <div class="stat">
+                    <div class="stat-logo" style="background:#e5e7eb; color:#10b981; border-radius:12px;">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+                    <div>
+                        <div class="label" style="color:#555;">Total Siswa</div>
+                        <div class="value">{{ $total_siswa ?? '-' }}</div>
+                    </div>
                 </div>
-            </div>
-            <div class="stat">
-                <div class="stat-logo"><i class="fa-solid fa-chalkboard-user"></i></div>
-                <div>
-                    <div class="label">Total Guru</div>
-                    <div class="value">{{ $total_guru ?? '-' }}</div>
+                <div class="stat">
+                    <div class="stat-logo" style="background:#e5e7eb; color:#6366f1; border-radius:12px;">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+                    <div>
+                        <div class="label" style="color:#555;">Total Guru</div>
+                        <div class="value">{{ $total_guru ?? '-' }}</div>
+                    </div>
                 </div>
-            </div>
-            <div class="stat">
-                <div class="stat-logo"><i class="fa-solid fa-school"></i></div>
-                <div>
-                    <div class="label">Total Kelas</div>
-                    <div class="value">{{ $total_kelas ?? '-' }}</div>
+                <div class="stat">
+                    <div class="stat-logo" style="background:#e5e7eb; color:#f59e42; border-radius:12px;">
+                        <i class="fa-solid fa-school"></i>
+                    </div>
+                    <div>
+                        <div class="label" style="color:#555;">Total Kelas</div>
+                        <div class="value">{{ $total_kelas ?? '-' }}</div>
+                    </div>
                 </div>
             </div>
         </div>
-
+        <br>
+    
         <div class="actions">
             <a href="{{ route('admin.siswa') }}" class="action-btn text-decoration-none text-dark" style="color:#000">
             <span class="action-icon"><i class="fa-solid fa-users"></i></span>
@@ -98,6 +106,7 @@
             </button>
         </div>
     </div>
+
 
     <!-- end .wrap -->
 
