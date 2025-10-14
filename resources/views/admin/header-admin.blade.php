@@ -3,7 +3,9 @@
         <div class="d-flex align-items-center">
             <img src="{{ asset('img/logo.jpg') }}" alt="Logo" class="me-2" style="width:64px; height:64px; border-radius:8px; object-fit:cover; display:inline-block;">
             <span class="mx-2"></span>
-            <span class="school fs-5">{{ strtoupper(env('NAMA_SEKOLAH', config('app.name', 'Nama Sekolah'))) }}</span>
+            <a href="{{ url('admin-dashboard') }}" class="school fs-5 text-decoration-none text-dark">
+                {{ strtoupper(env('NAMA_SEKOLAH', config('app.name', 'Nama Sekolah'))) }}
+            </a>
         </div>
         <div class="d-flex align-items-center">
             <span class="avatar d-flex align-items-center justify-content-center me-2" style="width:36px;height:36px;border-radius:50%;background:#efefef;">Img</span>
