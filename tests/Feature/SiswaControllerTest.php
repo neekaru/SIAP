@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\DataKelas;
 use App\Models\DataSiswa;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -118,6 +119,51 @@ class SiswaControllerTest extends TestCase
             'name' => 'Updated Name',
             'email' => 'updated@example.com',
             'username' => 'updateduser',
+        ]);
+    }
+
+    public function test_update_does_not_modify_user_data_when_values_unchanged(): void
+    {
+        $user = User::factory()->create([
+            'username' => 'testsiswa',
+            'name' => 'Test Siswa',
+            'email' => 'test@siswa.sch.id',
+        ]);
+
+        $siswa = DataSiswa::factory()->create([
+            'nama' => 'Test Siswa',
+            'user_id' => $user->id,
+        ]);
+
+        $originalUserData = $user->toArray();
+
+        $data = [
+            'user_name' => $user->name, // Same value
+            'email' => $user->email, // Same value
+            'username' => $user->username, // Same value
+            'nama' => 'Test Siswa Updated', // Changed
+            'nis' => $siswa->nis, // Same
+            'kelas_id' => $siswa->kelas_id, // Same
+            'no_hp_ortu' => '081234567891', // Changed
+        ];
+
+        $response = $this->put(route('siswa.update', $siswa->id), $data);
+
+        $response->assertRedirect(route('siswa.index'));
+
+        // Siswa data should be updated
+        $this->assertDatabaseHas('data_siswa', [
+            'id' => $siswa->id,
+            'nama' => 'Test Siswa Updated',
+            'no_hp_ortu' => '081234567891',
+        ]);
+
+        // User data should remain unchanged
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'name' => $originalUserData['name'],
+            'email' => $originalUserData['email'],
+            'username' => $originalUserData['username'],
         ]);
     }
 

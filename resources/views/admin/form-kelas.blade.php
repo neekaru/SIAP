@@ -48,11 +48,11 @@
         .form-row{display:grid;grid-template-columns:1fr 1fr;gap:24px}
         .form-row.full{grid-template-columns:1fr}
         .btn-group{display:flex;gap:12px;margin-top:24px;justify-content:flex-end}
-        .btn{padding:10px 24px;border:none;border-radius:4px;font-weight:600;cursor:pointer;transition:all 0.3s}
-        .btn-primary{background:#007bff;color:#fff}
-        .btn-primary:hover{background:#0056b3;text-decoration:none;color:#fff}
-        .btn-secondary{background:#6c757d;color:#fff}
-        .btn-secondary:hover{background:#545b62;text-decoration:none;color:#fff}
+        .form-wrap .btn{padding:10px 24px;border:none;border-radius:4px;font-weight:600;cursor:pointer;transition:all 0.3s}
+        .form-wrap .btn-primary{background:#007bff;color:#fff}
+        .form-wrap .btn-primary:hover{background:#0056b3;text-decoration:none;color:#fff}
+        .form-wrap .btn-secondary{background:#6c757d;color:#fff}
+        .form-wrap .btn-secondary:hover{background:#545b62;text-decoration:none;color:#fff}
         .error-message{color:#dc3545;font-size:12px;margin-top:4px;display:block}
         .form-group.has-error input,
         .form-group.has-error select,

@@ -85,12 +85,22 @@ class SiswaController extends Controller
      */
     public function update(StoreSiswaRequest $request, DataSiswa $dataSiswa)
     {
-        // Update user
-        $dataSiswa->user->update([
-            'name' => $request->user_name,
-            'email' => $request->email,
-            'username' => $request->username,
-        ]);
+        // Only update user data if values have changed
+        $userData = [];
+        if ($request->user_name !== $dataSiswa->user->name) {
+            $userData['name'] = $request->user_name;
+        }
+        if ($request->email !== $dataSiswa->user->email) {
+            $userData['email'] = $request->email;
+        }
+        if ($request->username !== $dataSiswa->user->username) {
+            $userData['username'] = $request->username;
+        }
+
+        // Update user only if there are changes
+        if (! empty($userData)) {
+            $dataSiswa->user->update($userData);
+        }
 
         // Update siswa
         $dataSiswa->update([
