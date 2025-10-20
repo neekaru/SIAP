@@ -6,6 +6,7 @@ use App\Http\Requests\StoreSiswaRequest;
 use App\Models\DataKelas;
 use App\Models\DataSiswa;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class SiswaController extends Controller
 {
@@ -24,11 +25,9 @@ class SiswaController extends Controller
      */
     public function create()
     {
-        $users = User::where('role', 'siswa')->get();
         $kelas = DataKelas::all();
 
         return view('admin.form-siswa', [
-            'users' => $users,
             'kelas' => $kelas,
         ]);
     }
@@ -38,7 +37,23 @@ class SiswaController extends Controller
      */
     public function store(StoreSiswaRequest $request)
     {
-        DataSiswa::create($request->validated());
+        // Create user
+        $user = User::create([
+            'name' => $request->user_name,
+            'email' => $request->email,
+            'username' => $request->username,
+            'password' => Hash::make($request->password),
+            'role' => 'siswa',
+        ]);
+
+        // Create siswa
+        DataSiswa::create([
+            'nama' => $request->nama,
+            'nis' => $request->nis,
+            'user_id' => $user->id,
+            'kelas_id' => $request->kelas_id,
+            'no_hp_ortu' => $request->no_hp_ortu,
+        ]);
 
         return redirect()->route('siswa.index')->with('success', 'Siswa berhasil ditambahkan');
     }
@@ -56,12 +71,10 @@ class SiswaController extends Controller
      */
     public function edit(DataSiswa $dataSiswa)
     {
-        $users = User::where('role', 'siswa')->get();
         $kelas = DataKelas::all();
 
         return view('admin.form-siswa', [
             'siswa' => $dataSiswa,
-            'users' => $users,
             'kelas' => $kelas,
         ]);
     }
@@ -71,7 +84,20 @@ class SiswaController extends Controller
      */
     public function update(StoreSiswaRequest $request, DataSiswa $dataSiswa)
     {
-        $dataSiswa->update($request->validated());
+        // Update user
+        $dataSiswa->user->update([
+            'name' => $request->user_name,
+            'email' => $request->email,
+            'username' => $request->username,
+        ]);
+
+        // Update siswa
+        $dataSiswa->update([
+            'nama' => $request->nama,
+            'nis' => $request->nis,
+            'kelas_id' => $request->kelas_id,
+            'no_hp_ortu' => $request->no_hp_ortu,
+        ]);
 
         return redirect()->route('siswa.index')->with('success', 'Siswa berhasil diperbarui');
     }

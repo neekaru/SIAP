@@ -78,63 +78,99 @@
                     @method('PUT')
                 @endif
 
-                <div class="form-row">
-                    <div class="form-group @error('nama') has-error @enderror">
-                        <label for="nama">Nama Siswa</label>
-                        <input type="text" id="nama" name="nama" value="{{ old('nama', $siswa->nama ?? '') }}" required placeholder="Masukkan nama siswa">
-                        @error('nama')
-                            <span class="error-message">{{ $message }}</span>
-                        @enderror
+                <!-- DATA SISWA -->
+                <div style="background:#f8f9fa; padding:16px; border-radius:6px; margin-bottom:24px">
+                    <h4 style="margin-top:0; margin-bottom:16px; color:#333">Data Siswa</h4>
+                    
+                    <div class="form-row">
+                        <div class="form-group @error('nama') has-error @enderror">
+                            <label for="nama">Nama Siswa</label>
+                            <input type="text" id="nama" name="nama" value="{{ old('nama', $siswa->nama ?? '') }}" required placeholder="Masukkan nama siswa">
+                            @error('nama')
+                                <span class="error-message">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group @error('nis') has-error @enderror">
+                            <label for="nis">NIS</label>
+                            <input type="text" id="nis" name="nis" value="{{ old('nis', $siswa->nis ?? '') }}" required placeholder="Masukkan nomor induk siswa">
+                            @error('nis')
+                                <span class="error-message">{{ $message }}</span>
+                            @enderror
+                        </div>
                     </div>
 
-                    <div class="form-group @error('nis') has-error @enderror">
-                        <label for="nis">NIS</label>
-                        <input type="text" id="nis" name="nis" value="{{ old('nis', $siswa->nis ?? '') }}" required placeholder="Masukkan nomor induk siswa">
-                        @error('nis')
-                            <span class="error-message">{{ $message }}</span>
-                        @enderror
-                    </div>
-                </div>
+                    <div class="form-row">
+                        <div class="form-group @error('kelas_id') has-error @enderror">
+                            <label for="kelas_id">Kelas</label>
+                            <select id="kelas_id" name="kelas_id">
+                                <option value="">-- Pilih Kelas --</option>
+                                @foreach($kelas ?? [] as $k)
+                                    <option value="{{ $k->id }}" {{ old('kelas_id', $siswa->kelas_id ?? '') == $k->id ? 'selected' : '' }}>
+                                        {{ $k->nama ?? $k->kode }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('kelas_id')
+                                <span class="error-message">{{ $message }}</span>
+                            @enderror
+                        </div>
 
-                <div class="form-row">
-                    <div class="form-group @error('user_id') has-error @enderror">
-                        <label for="user_id">Akun Pengguna</label>
-                        <select id="user_id" name="user_id" required>
-                            <option value="">-- Pilih Akun --</option>
-                            @foreach($users ?? [] as $user)
-                                <option value="{{ $user->id }}" {{ old('user_id', $siswa->user_id ?? '') == $user->id ? 'selected' : '' }}>
-                                    {{ $user->name }} ({{ $user->email }})
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('user_id')
-                            <span class="error-message">{{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    <div class="form-group @error('kelas_id') has-error @enderror">
-                        <label for="kelas_id">Kelas</label>
-                        <select id="kelas_id" name="kelas_id">
-                            <option value="">-- Pilih Kelas --</option>
-                            @foreach($kelas ?? [] as $k)
-                                <option value="{{ $k->id }}" {{ old('kelas_id', $siswa->kelas_id ?? '') == $k->id ? 'selected' : '' }}>
-                                    {{ $k->nama_kelas ?? $k->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('kelas_id')
-                            <span class="error-message">{{ $message }}</span>
-                        @enderror
+                        <div class="form-group @error('no_hp_ortu') has-error @enderror">
+                            <label for="no_hp_ortu">No. HP Orang Tua</label>
+                            <input type="tel" id="no_hp_ortu" name="no_hp_ortu" value="{{ old('no_hp_ortu', $siswa->no_hp_ortu ?? '') }}" placeholder="Masukkan nomor HP orang tua">
+                            @error('no_hp_ortu')
+                                <span class="error-message">{{ $message }}</span>
+                            @enderror
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group @error('no_hp_ortu') has-error @enderror">
-                        <label for="no_hp_ortu">No. HP Orang Tua</label>
-                        <input type="tel" id="no_hp_ortu" name="no_hp_ortu" value="{{ old('no_hp_ortu', $siswa->no_hp_ortu ?? '') }}" placeholder="Masukkan nomor HP orang tua">
-                        @error('no_hp_ortu')
-                            <span class="error-message">{{ $message }}</span>
-                        @enderror
+                <!-- DATA PENGGUNA (USER) -->
+                <div style="background:#f8f9fa; padding:16px; border-radius:6px; margin-bottom:24px">
+                    <h4 style="margin-top:0; margin-bottom:16px; color:#333">Data Pengguna</h4>
+                    
+                    <div class="form-row">
+                        <div class="form-group @error('user_name') has-error @enderror">
+                            <label for="user_name">Nama Pengguna</label>
+                            <input type="text" id="user_name" name="user_name" value="{{ old('user_name', $siswa?->user?->name ?? '') }}" required placeholder="Akan terisi otomatis dari nama siswa">
+                            @error('user_name')
+                                <span class="error-message">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group @error('email') has-error @enderror">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" value="{{ old('email', $siswa?->user?->email ?? '') }}" required placeholder="Akan terisi otomatis dari nama siswa">
+                            @error('email')
+                                <span class="error-message">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group @error('username') has-error @enderror">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" value="{{ old('username', $siswa?->user?->username ?? '') }}" required placeholder="Akan terisi otomatis dari nama siswa">
+                            @error('username')
+                                <span class="error-message">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        @if(!isset($siswa))
+                        <div class="form-group @error('password') has-error @enderror">
+                            <label for="password">Password</label>
+                            <div style="position: relative;">
+                                <input type="password" id="password" name="password" required placeholder="Masukkan password">
+                                <button type="button" id="togglePassword" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #666;">
+                                    <i class="fas fa-eye" id="passwordIcon"></i>
+                                </button>
+                            </div>
+                            @error('password')
+                                <span class="error-message">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        @endif
                     </div>
                 </div>
 
@@ -149,5 +185,51 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-fill user data from student name
+        document.getElementById('nama').addEventListener('input', function() {
+            const nama = this.value.trim();
+            
+            if (nama) {
+                // Set nama pengguna (same as nama siswa)
+                document.getElementById('user_name').value = nama;
+                
+                // Generate username (lowercase, no spaces, replace with dots or underscores)
+                const username = nama.toLowerCase().replace(/\s+/g, '.');
+                document.getElementById('username').value = username;
+                
+                // Generate email (lowercase, no spaces, add @siswa.school or similar)
+                const emailUsername = nama.toLowerCase().replace(/\s+/g, '.');
+                document.getElementById('email').value = emailUsername + '@siswa.sch.id';
+            }
+        });
+
+        // Trigger auto-fill on page load if nama already has value
+        window.addEventListener('load', function() {
+            const namaInput = document.getElementById('nama');
+            if (namaInput.value) {
+                namaInput.dispatchEvent(new Event('input'));
+            }
+        });
+
+        // Toggle password visibility
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const passwordIcon = document.getElementById('passwordIcon');
+
+        if (togglePassword && passwordInput && passwordIcon) {
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // Toggle icon
+                if (type === 'password') {
+                    passwordIcon.className = 'fas fa-eye';
+                } else {
+                    passwordIcon.className = 'fas fa-eye-slash';
+                }
+            });
+        }
+    </script>
 </body>
 </html>

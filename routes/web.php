@@ -46,13 +46,11 @@ Route::get('/admin-dashboard/siswa', [AdminDashboardController::class, 'siswa'])
 // Admin - Manajemen Guru
 Route::get('/admin-dashboard/guru', [AdminDashboardController::class, 'guru'])->name('admin.guru');
 
-// Admin - Manajemen Siswa
-Route::get('/admin-dashboard/siswa', [AdminDashboardController::class, 'siswa'])->name('admin.siswa');
+// Admin - Manajemen Kelas
+Route::get('/admin-dashboard/kelas', [AdminDashboardController::class, 'kelas'])->name('admin.kelas');
 
 // Admin - Manajemen Siswa (CRUD)
 Route::resource('siswa', SiswaController::class);
-
-// Admin - Manajemen Guru
 // Simple endpoints to accept attendance confirmations (AJAX)
 Route::post('/absen/masuk', function (Request $request) {
     // In a real app you'd validate, authorize and persist this to DB
