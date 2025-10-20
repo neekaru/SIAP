@@ -13,16 +13,23 @@ class StoreGuruRequest extends FormRequest
 
     public function rules(): array
     {
+        $guruParam = $this->route('guru');
+        $guru = null;
+        if ($guruParam instanceof \App\Models\DataGuru) {
+            $guru = $guruParam;
+        } elseif (is_numeric($guruParam)) {
+            $guru = \App\Models\DataGuru::find($guruParam);
+        }
+
         $nipUnique = 'unique:data_guru,nip';
-        $guru = $this->route('guru');
-        if ($guru && is_object($guru)) {
+        if ($guru) {
             $nipUnique .= ','.$guru->id;
         }
 
         $emailUnique = 'unique:users,email';
         $usernameUnique = 'unique:users,username';
 
-        if ($guru && is_object($guru)) {
+        if ($guru) {
             $emailUnique .= ','.$guru->user_id;
             $usernameUnique .= ','.$guru->user_id;
         }

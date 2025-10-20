@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\DataGuru;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -118,6 +119,58 @@ class GuruControllerTest extends TestCase
             'nama' => 'Ahmad Hidayat Updated',
             'nip' => '87654321',
             'is_wali' => false,
+        ]);
+        $this->assertDatabaseHas('users', [
+            'id' => $guru->user_id,
+            'name' => 'Ahmad Hidayat Updated',
+            'email' => 'ahmad.updated@guru.sch.id',
+            'username' => 'ahmad.updated',
+        ]);
+    }
+
+    public function test_update_does_not_modify_user_data_when_values_unchanged(): void
+    {
+        $user = User::factory()->create([
+            'username' => 'testguru',
+            'name' => 'Test Guru',
+            'email' => 'test@guru.sch.id',
+        ]);
+
+        $guru = DataGuru::factory()->create([
+            'nama' => 'Test Guru',
+            'user_id' => $user->id,
+        ]);
+
+        $originalUserData = $user->toArray();
+
+        $data = [
+            'user_name' => $user->name, // Same value
+            'email' => $user->email, // Same value
+            'username' => $user->username, // Same value
+            'nip' => '87654321', // Changed
+            'nama' => 'Test Guru Updated', // Changed
+            'no_hp' => '081234567891', // Changed
+            'is_wali' => true, // Changed
+        ];
+
+        $response = $this->put(route('guru.update', $guru->id), $data);
+
+        $response->assertRedirect(route('guru.index'));
+
+        // Guru data should be updated
+        $this->assertDatabaseHas('data_guru', [
+            'id' => $guru->id,
+            'nama' => 'Test Guru Updated',
+            'nip' => '87654321',
+            'is_wali' => true,
+        ]);
+
+        // User data should remain unchanged
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'name' => $originalUserData['name'],
+            'email' => $originalUserData['email'],
+            'username' => $originalUserData['username'],
         ]);
     }
 

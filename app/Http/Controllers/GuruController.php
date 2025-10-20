@@ -76,12 +76,22 @@ class GuruController extends Controller
      */
     public function update(StoreGuruRequest $request, DataGuru $guru)
     {
-        // Update user
-        $guru->user->update([
-            'name' => $request->user_name,
-            'email' => $request->email,
-            'username' => $request->username,
-        ]);
+        // Only update user data if values have changed
+        $userData = [];
+        if ($request->user_name !== $guru->user->name) {
+            $userData['name'] = $request->user_name;
+        }
+        if ($request->email !== $guru->user->email) {
+            $userData['email'] = $request->email;
+        }
+        if ($request->username !== $guru->user->username) {
+            $userData['username'] = $request->username;
+        }
+
+        // Update user only if there are changes
+        if (! empty($userData)) {
+            $guru->user->update($userData);
+        }
 
         // Update guru
         $guru->update([
