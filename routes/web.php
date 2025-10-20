@@ -40,19 +40,25 @@ Route::get('/guru-dashboard/kehadiran', [GuruDashboardController::class, 'kehadi
 Route::get('/guru-dashboard/izin_sakit', [GuruDashboardController::class, 'izinSakit'])->name('guru.izin_sakit');
 
 // Admin dashboard
-Route::get('/admin-dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+Route::prefix('admin-dashboard')->group(function () {
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
-// Admin - Manajemen Siswa
-Route::get('/admin-dashboard/siswa', [AdminDashboardController::class, 'siswa'])->name('admin.siswa');
+    // Admin - Manajemen Siswa
+    Route::get('/siswa', [AdminDashboardController::class, 'siswa'])->name('admin.siswa');
 
-// Admin - Manajemen Guru
-Route::get('/admin-dashboard/guru', [AdminDashboardController::class, 'guru'])->name('admin.guru');
+    // Admin - Manajemen Guru
+    Route::get('/guru', [AdminDashboardController::class, 'guru'])->name('admin.guru');
 
-// Admin - Manajemen Kelas
-Route::get('/admin-dashboard/kelas', [AdminDashboardController::class, 'kelas'])->name('admin.kelas');
+    // Admin - Manajemen Kelas
+    Route::get('/kelas', [AdminDashboardController::class, 'kelas'])->name('admin.kelas');
+
+    Route::get('/stats', [AdminDashboardController::class, 'DataTotal'])->name('admin.stats');
+});
 
 // Admin - Manajemen Siswa (CRUD)
-Route::resource('siswa', SiswaController::class);
+Route::resource('siswa', SiswaController::class)->parameters([
+    'siswa' => 'data_siswa',
+]);
 
 // Admin - Manajemen Guru (CRUD)
 Route::resource('guru', GuruController::class);

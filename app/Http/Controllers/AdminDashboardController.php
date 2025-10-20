@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\DataGuru;
+use App\Models\DataKelas;
+use App\Models\DataSiswa;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 
@@ -20,13 +22,7 @@ class AdminDashboardController extends Controller implements HasMiddleware
      */
     public function index(Request $request): \Illuminate\Http\Response
     {
-        $data = [
-            'total_siswa' => 32,
-            'total_guru' => 6,
-            'total_kelas' => 12,
-        ];
-
-        return response()->view('admin.dashboard', $data);
+        return response()->view('admin.dashboard');
     }
 
     /**
@@ -34,7 +30,9 @@ class AdminDashboardController extends Controller implements HasMiddleware
      */
     public function siswa(Request $request): \Illuminate\Http\Response
     {
-        return response()->view('admin.siswa');
+        $siswa = DataSiswa::with('user', 'kelas')->get();
+
+        return response()->view('admin.siswa', ['siswa' => $siswa]);
     }
 
     /**
@@ -42,7 +40,9 @@ class AdminDashboardController extends Controller implements HasMiddleware
      */
     public function guru(Request $request): \Illuminate\Http\Response
     {
-        return response()->view('admin.guru');
+        $guru = DataGuru::with('user')->get();
+
+        return response()->view('admin.guru', ['guru' => $guru]);
     }
 
     /**
@@ -68,6 +68,24 @@ class AdminDashboardController extends Controller implements HasMiddleware
      */
     public function kelas(Request $request): \Illuminate\Http\Response
     {
-        return response()->view('admin.kelas');
+        $kelas = DataKelas::with('walikelas')->get();
+
+        return response()->view('admin.kelas', ['kelas' => $kelas]);
+    }
+
+    public function DataTotal(Request $request): \Illuminate\Http\JsonResponse
+    {
+        // Grab data Siswa
+        $siswa = DataSiswa::all()->count();
+        $guru = DataGuru::all()->count();
+        $kelas = DataKelas::all()->count();
+
+        $data = [
+            'total_siswa' => $siswa,
+            'total_guru' => $guru,
+            'total_kelas' => $kelas,
+        ];
+
+        return response()->json($data);
     }
 }

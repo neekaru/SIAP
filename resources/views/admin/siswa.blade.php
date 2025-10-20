@@ -58,6 +58,7 @@
                         <th class="text-center" style="width:60px">NO</th>
                         <th>Nama</th>
                         <th style="width:160px">NIS</th>
+                        <th style="width:200px">Kelas</th>
                         <th style="width:220px">Email</th>
                         <th class="text-center" style="width:180px">Action</th>
                     </tr>
@@ -68,6 +69,7 @@
                             <td>{{ $i + 1 }}</td>
                             <td>{{ $row->nama ?? '-' }}</td>
                             <td>{{ $row->nis ?? '-' }}</td>
+                            <td>{{ $row->kelas->nama ?? '-' }}</td>
                             <td>{{ $row->user->email ?? '-' }}</td>
                             <td>
                                 <div class="d-flex gap-2">
@@ -82,7 +84,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center text-muted" style="padding:48px">Tidak ada data siswa.</td>
+                            <td colspan="6" class="text-center text-muted" style="padding:48px">Tidak ada data siswa.</td>
                         </tr>
                     @endforelse
                 </tbody>

@@ -13,7 +13,13 @@ class KelasController extends Controller
      */
     public function index()
     {
-        $kelas = DataKelas::with('walikelas')->get();
+        $kelas = DataKelas::with('walikelas')->get()->map(function (DataKelas $item): DataKelas {
+            if (is_null($item->walikelas)) {
+                $item->setRelation('walikelas', new DataGuru(['nama' => 'Belum ada wali kelas']));
+            }
+
+            return $item;
+        });
 
         return view('admin.kelas', ['kelas' => $kelas]);
     }

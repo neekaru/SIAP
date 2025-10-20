@@ -14,7 +14,7 @@ class StoreSiswaRequest extends FormRequest
     public function rules(): array
     {
         $nisUnique = 'unique:data_siswa,nis';
-        $siswa = $this->route('siswa');
+        $siswa = $this->route('data_siswa');
         if ($siswa && is_object($siswa)) {
             $nisUnique .= ','.$siswa->id;
         }

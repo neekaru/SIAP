@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\DataKelas;
 use App\Models\DataSiswa;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -29,19 +28,20 @@ class SiswaControllerTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertViewIs('admin.form-siswa');
-        $response->assertViewHas('users');
         $response->assertViewHas('kelas');
     }
 
     public function test_store_creates_new_siswa(): void
     {
-        $user = User::factory()->create();
         $kelas = DataKelas::factory()->create();
 
         $data = [
+            'user_name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+            'username' => 'johndoe',
+            'password' => 'password123',
             'nama' => 'John Doe',
             'nis' => '12345678',
-            'user_id' => $user->id,
             'kelas_id' => $kelas->id,
             'no_hp_ortu' => '081234567890',
         ];
@@ -49,6 +49,11 @@ class SiswaControllerTest extends TestCase
         $response = $this->post(route('siswa.store'), $data);
 
         $response->assertRedirect(route('siswa.index'));
+        $this->assertDatabaseHas('users', [
+            'name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+            'username' => 'johndoe',
+        ]);
         $this->assertDatabaseHas('data_siswa', [
             'nama' => 'John Doe',
             'nis' => '12345678',
@@ -58,17 +63,22 @@ class SiswaControllerTest extends TestCase
     public function test_store_fails_with_duplicate_nis(): void
     {
         $siswa = DataSiswa::factory()->create();
-        $user = User::factory()->create();
 
         $data = [
+            'user_name' => 'Jane Doe',
+            'email' => 'jane.doe@example.com',
+            'username' => 'janedoe',
+            'password' => 'password123',
             'nama' => 'Jane Doe',
             'nis' => $siswa->nis,
-            'user_id' => $user->id,
+            'kelas_id' => $siswa->kelas_id,
+            'no_hp_ortu' => '081234567891',
         ];
 
         $response = $this->post(route('siswa.store'), $data);
 
-        $response->assertSessionHasErrors('nis');
+        $response->assertRedirect();
+        $this->assertDatabaseMissing('data_siswa', ['nama' => 'Jane Doe']);
     }
 
     public function test_edit_shows_form(): void
@@ -87,9 +97,11 @@ class SiswaControllerTest extends TestCase
         $siswa = DataSiswa::factory()->create();
 
         $data = [
+            'user_name' => 'Updated Name',
+            'email' => 'updated@example.com',
+            'username' => 'updateduser',
             'nama' => 'Updated Name',
             'nis' => $siswa->nis,
-            'user_id' => $siswa->user_id,
             'kelas_id' => $siswa->kelas_id,
             'no_hp_ortu' => '089876543210',
         ];
@@ -100,6 +112,12 @@ class SiswaControllerTest extends TestCase
         $this->assertDatabaseHas('data_siswa', [
             'id' => $siswa->id,
             'nama' => 'Updated Name',
+        ]);
+        $this->assertDatabaseHas('users', [
+            'id' => $siswa->user_id,
+            'name' => 'Updated Name',
+            'email' => 'updated@example.com',
+            'username' => 'updateduser',
         ]);
     }
 

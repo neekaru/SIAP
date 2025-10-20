@@ -75,6 +75,7 @@ class SiswaController extends Controller
 
         return view('admin.form-siswa', [
             'siswa' => $dataSiswa,
+            'siswa_id' => $dataSiswa->id,
             'kelas' => $kelas,
         ]);
     }

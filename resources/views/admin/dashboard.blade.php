@@ -60,7 +60,7 @@
                     </div>
                     <div>
                         <div class="label" style="color:#555;">Total Siswa</div>
-                        <div class="value">{{ $total_siswa ?? '-' }}</div>
+                        <div class="value" id="total-siswa"></div>
                     </div>
                 </div>
                 <div class="stat">
@@ -69,7 +69,7 @@
                     </div>
                     <div>
                         <div class="label" style="color:#555;">Total Guru</div>
-                        <div class="value">{{ $total_guru ?? '-' }}</div>
+                        <div class="value" id="total-guru"></div>
                     </div>
                 </div>
                 <div class="stat">
@@ -78,13 +78,13 @@
                     </div>
                     <div>
                         <div class="label" style="color:#555;">Total Kelas</div>
-                        <div class="value">{{ $total_kelas ?? '-' }}</div>
+                        <div class="value" id="total-kelas"></div>
                     </div>
                 </div>
             </div>
         </div>
         <br>
-    
+
         <div class="actions">
             <a href="{{ route('admin.siswa') }}" class="action-btn text-decoration-none text-dark" style="color:#000">
             <span class="action-icon"><i class="fa-solid fa-users"></i></span>
@@ -156,6 +156,22 @@
     <script>
         (function(){
                 document.addEventListener('DOMContentLoaded', function(){
+                    // Load stats data from API
+                    fetch("{{ route('admin.stats') }}", {
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            document.getElementById('total-siswa').textContent = data.total_siswa;
+                            document.getElementById('total-guru').textContent = data.total_guru;
+                            document.getElementById('total-kelas').textContent = data.total_kelas;
+                        })
+                        .catch(error => {
+                            console.error('Error fetching stats:', error);
+                        });
+
                     // Ensure modal is appended to body to avoid stacking-context issues
                     try {
                         const modalEl = document.getElementById('laporanModal');

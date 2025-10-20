@@ -72,11 +72,14 @@
         <div class="form-wrap">
             <h2>{{ isset($siswa) ? 'Edit Siswa' : 'Tambah Siswa' }}</h2>
 
-            <form method="POST" action="{{ isset($siswa) && $siswa ? route('siswa.update', $siswa->id) : route('siswa.store') }}">
-                @csrf
-                @if(isset($siswa) && $siswa)
+            @if(isset($siswa))
+                <form method="POST" action="{{ route('siswa.update', $siswa_id) }}">
+                    @csrf
                     @method('PUT')
-                @endif
+            @else
+                <form method="POST" action="{{ route('siswa.store') }}">
+                    @csrf
+            @endif
 
                 <!-- DATA SISWA -->
                 <div style="background:#f8f9fa; padding:16px; border-radius:6px; margin-bottom:24px">
