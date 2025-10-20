@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\GuruController;
 use App\Http\Controllers\GuruDashboardController;
+use App\Http\Controllers\KelasController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\SiswaDashboardController;
 use Illuminate\Http\Request;
@@ -51,6 +53,15 @@ Route::get('/admin-dashboard/kelas', [AdminDashboardController::class, 'kelas'])
 
 // Admin - Manajemen Siswa (CRUD)
 Route::resource('siswa', SiswaController::class);
+
+// Admin - Manajemen Guru (CRUD)
+Route::resource('guru', GuruController::class);
+
+// Admin - Manajemen Kelas (CRUD)
+Route::resource('kelas', KelasController::class)->parameters([
+    'kelas' => 'kelas',
+]);
+
 // Simple endpoints to accept attendance confirmations (AJAX)
 Route::post('/absen/masuk', function (Request $request) {
     // In a real app you'd validate, authorize and persist this to DB

@@ -31,16 +31,23 @@
         <div class="table-wrap">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 class="mb-0">Manajemen Kelas</h2>
-                <a href="#" class="btn btn-primary">Tambah Kelas</a>
+                <a href="{{ route('kelas.create') }}" class="btn btn-primary">Tambah Kelas</a>
             </div>
+
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
 
             <table class="data">
                 <thead>
                     <tr>
                         <th class="text-center" style="width:60px">NO</th>
-                        <th>Kelas</th>
-                        <th>Guru</th>
-                        <th class="col-jumlah">Jumlah Siswa</th>
+                        <th style="width:120px">Kode</th>
+                        <th>Nama Kelas</th>
+                        <th>Wali Kelas</th>
                         <th class="text-center" style="width:180px">Action</th>
                     </tr>
                 </thead>
@@ -48,13 +55,17 @@
                     @forelse($kelas ?? [] as $i => $row)
                         <tr>
                             <td>{{ $i + 1 }}</td>
-                            <td>{{ $row['kelas'] ?? '-' }}</td>
-                            <td>{{ $row['guru'] ?? '-' }}</td>
-                            <td class="col-jumlah">{{ $row['jumlah_siswa'] ?? '-' }}</td>
+                            <td>{{ $row->kode ?? '-' }}</td>
+                            <td>{{ $row->nama ?? '-' }}</td>
+                            <td>{{ $row->walikelas->nama ?? '-' }}</td>
                             <td>
                                 <div class="d-flex gap-2">
-                                    <button class="btn btn-sm btn-outline-primary">Edit</button>
-                                    <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                    <a href="{{ route('kelas.edit', $row->id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                    <form method="POST" action="{{ route('kelas.destroy', $row->id) }}" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>

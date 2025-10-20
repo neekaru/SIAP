@@ -18,6 +18,9 @@
         table.data th, table.data td{border:2px solid #222;padding:8px;text-align:left}
         table.data th{background:#f5f5f5}
         .actions .btn{margin-right:8px}
+        .status-badge{display:inline-block;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:600}
+        .status-wali{background:#28a745;color:#fff}
+        .status-biasa{background:#6c757d;color:#fff}
         @media (max-width:900px){ .table-wrap{overflow:auto} }
     </style>
 </head>
@@ -29,16 +32,25 @@
         <div class="table-wrap">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 class="mb-0">Manajemen Guru</h2>
-                <a href="#" class="btn btn-primary">Tambah Guru</a>
+                <a href="{{ route('guru.create') }}" class="btn btn-primary">Tambah Guru</a>
             </div>
+
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
 
             <table class="data">
                 <thead>
                     <tr>
                         <th class="text-center" style="width:60px">NO</th>
-                        <th>Nama</th>
-                        <th style="width:160px">NUPTK</th>
-                        <th style="width:220px">Email</th>
+                        <th>NIP</th>
+                        <th>Nama Guru</th>
+                        <th style="width:160px">Email</th>
+                        <th style="width:120px">No. HP</th>
+                        <th class="text-center" style="width:120px">Status</th>
                         <th class="text-center" style="width:180px">Action</th>
                     </tr>
                 </thead>
@@ -46,19 +58,31 @@
                     @forelse($guru ?? [] as $i => $row)
                         <tr>
                             <td>{{ $i + 1 }}</td>
-                            <td>{{ $row['nama'] ?? '-' }}</td>
-                            <td>{{ $row['nuptk'] ?? '-' }}</td>
-                            <td>{{ $row['email'] ?? '-' }}</td>
+                            <td>{{ $row->nip ?? '-' }}</td>
+                            <td>{{ $row->nama ?? '-' }}</td>
+                            <td>{{ $row->user->email ?? '-' }}</td>
+                            <td>{{ $row->no_hp ?? '-' }}</td>
+                            <td class="text-center">
+                                @if($row->is_wali)
+                                    <span class="status-badge status-wali">Wali Kelas</span>
+                                @else
+                                    <span class="status-badge status-biasa">Guru</span>
+                                @endif
+                            </td>
                             <td>
                                 <div class="d-flex gap-2">
-                                    <button class="btn btn-sm btn-outline-primary">Edit</button>
-                                    <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                    <a href="{{ route('guru.edit', $row->id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                    <form method="POST" action="{{ route('guru.destroy', $row->id) }}" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center text-muted" style="padding:48px">Tidak ada data guru.</td>
+                            <td colspan="7" class="text-center text-muted" style="padding:48px">Tidak ada data guru.</td>
                         </tr>
                     @endforelse
                 </tbody>
