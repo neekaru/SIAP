@@ -47,4 +47,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function dataSiswa()
+    {
+        return $this->hasOne(DataSiswa::class);
+    }
 }

@@ -9,6 +9,8 @@ class DataSakitIzin extends Model
 {
     use HasFactory;
 
+    protected $table = 'data_sakit_izin';
+
     protected $fillable = [
         'siswa_id',
         'tipe',

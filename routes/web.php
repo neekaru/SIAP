@@ -35,9 +35,12 @@ Route::get('/login/admin', [LoginController::class, 'show'])->name('login.admin'
 Route::get('/siswa-dashboard', [SiswaDashboardController::class, 'index'])->name('siswa.dashboard');
 
 // Guru dashboard
-Route::get('/guru-dashboard', [GuruDashboardController::class, 'index'])->name('guru.dashboard');
-Route::get('/guru-dashboard/kehadiran', [GuruDashboardController::class, 'kehadiran'])->name('guru.kehadiran');
-Route::get('/guru-dashboard/izin_sakit', [GuruDashboardController::class, 'izinSakit'])->name('guru.izin_sakit');
+Route::prefix('guru-dashboard')->group(function () {
+    Route::get('/', [GuruDashboardController::class, 'index'])->name('guru.dashboard');
+    Route::get('/kehadiran', [GuruDashboardController::class, 'kehadiran'])->name('guru.kehadiran');
+    Route::get('/izin_sakit', [GuruDashboardController::class, 'izinSakit'])->name('guru.izin_sakit');
+    Route::get('/stats', [GuruDashboardController::class, 'StatsGuruDashboard'])->name('guru.stats');
+});
 
 // Admin dashboard
 Route::prefix('admin-dashboard')->group(function () {

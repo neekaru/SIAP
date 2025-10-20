@@ -61,7 +61,7 @@
                 </div>
                 <div>
                     <div class="label text-white">Total Siswa</div>
-                    <div class="value">{{ $total_siswa ?? '-' }}</div>
+                    <div class="value" id="total-siswa"></div>
                 </div>
             </div>
             <div class="stat" style="background: linear-gradient(135deg, #198754 0%, #146c43 100%); color: white;">
@@ -70,7 +70,7 @@
                 </div>
                 <div>
                     <div class="label text-white">Hadir</div>
-                    <div class="value">{{ $hadir ?? '-' }}</div>
+                    <div class="value" id="total-hadir"></div>
                 </div>
             </div>
             <div class="stat" style="background: linear-gradient(135deg, #fd7e14 0%, #d26e04 100%); color: white;">
@@ -79,7 +79,7 @@
                 </div>
                 <div>
                     <div class="label text-white">Izin/Sakit</div>
-                    <div class="value">{{ $izin_sakit ?? '-' }}</div>
+                    <div class="value" id="total-izin-sakit"></div>
                 </div>
             </div>
             <div class="stat" style="background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%); color: white;">
@@ -88,7 +88,7 @@
                 </div>
                 <div>
                     <div class="label text-white">Belum Absen</div>
-                    <div class="value">{{ $belum_absen ?? '-' }}</div>
+                    <div class="value" id="total-belum-absen"></div>
                 </div>
             </div>
         </div>
@@ -181,6 +181,20 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
                 (function(){
+                        // Statis ticks
+                        fetch("{{ route('guru.stats') }}", {
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            document.getElementById('total-siswa').textContent = data.total_siswa;
+                            document.getElementById('total-hadir').textContent = data.hadir;
+                            document.getElementById('total-izin-sakit').textContent = data.izin_sakit;
+                            document.getElementById('total-belum-absen').textContent = data.belum_absen;
+                        })
+
                         const openBtn = document.getElementById('open-report');
                         const reportModalEl = document.getElementById('reportModal');
                         const reportModal = new bootstrap.Modal(reportModalEl);

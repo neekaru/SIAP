@@ -43,20 +43,86 @@ class GuruDashboardController extends Controller implements HasMiddleware
     }
 
     /**
+     * This for stats guru dashboard
+     */
+     public function StatsGuruDashboard(Request $request): \Illuminate\Http\JsonResponse
+     {
+         // This calculate Total siswa
+         $siswa = \App\Models\DataSiswa::count();
+         $hadir = \App\Models\DataAbsensi::where('jenis', 'masuk')
+             ->whereDate('created_at', now()->toDateString())
+             ->count() ?? "0";
+         $izin_sakit = \App\Models\DataSakitIzin::whereDate('created_at', now()->toDateString())
+             ->where('status', 'tervalidasi')
+             ->count() ?? "0";
+         $belum_absen = $siswa - ($hadir + $izin_sakit) ?? "0";
+
+         return response()->json([
+             'total_siswa' => $siswa,
+             'hadir' => $hadir,
+             'izin_sakit' => $izin_sakit,
+             'belum_absen' => $belum_absen,
+         ]);
+     }
+
+    /**
      * Show the kehadiran (attendance) page for guru.
      */
     public function kehadiran(Request $request): \Illuminate\Http\Response
     {
-        // Dummy attendance data (no database). Each row includes nama, nis, waktu, status
-        $kehadiran = [
-            ['nama' => 'Ahmad Santoso', 'nis' => '001', 'waktu' => '07:05', 'status' => 'Hadir'],
-            ['nama' => 'Siti Nurhaliza', 'nis' => '002', 'waktu' => '07:12', 'status' => 'Hadir'],
-            ['nama' => 'Budi Santoso', 'nis' => '003', 'waktu' => '-', 'status' => 'Izin'],
-            ['nama' => 'Rina Wijaya', 'nis' => '004', 'waktu' => '-', 'status' => 'Alpa'],
-            ['nama' => 'Dedi Kurnia', 'nis' => '005', 'waktu' => '07:20', 'status' => 'Hadir'],
-        ];
+        // Get today's date
+        $today = now()->toDateString();
+
+        // Get all students
+        $siswaList = \App\Models\DataSiswa::all();
+
+        // Get today's attendance with eager loading
+        $todayAbsensi = \App\Models\DataAbsensi::with('siswa')
+            ->where('tanggal', $today)
+            ->get()
+            ->keyBy('siswa_id');
+
+        // Get today's izin/sakit
+        $todayIzin = \App\Models\DataSakitIzin::whereDate('created_at', $today)
+            ->where('status', 'tervalidasi')
+            ->get()
+            ->keyBy('siswa_id');
+
+        $kehadiran = $siswaList->map(function ($siswa) use ($todayAbsensi, $todayIzin) {
+            $siswaId = $siswa->id;
+            $status = 'Alpa'; // Default
+            $waktu = '-';
+
+            if ($todayAbsensi->has($siswaId)) {
+                $absensi = $todayAbsensi->get($siswaId);
+                $status = $this->mapJenisToStatus($absensi->jenis);
+                $waktu = $absensi->created_at->format('H:i');
+            } elseif ($todayIzin->has($siswaId)) {
+                $izin = $todayIzin->get($siswaId);
+                $status = ucfirst($izin->tipe); // Sakit or Izin
+            }
+
+            return [
+                'nama' => $siswa->nama,
+                'nis' => $siswa->nis,
+                'waktu' => $waktu,
+                'status' => $status,
+            ];
+        })->toArray();
 
         return response()->view('guru.kehadiran', ['kehadiran' => $kehadiran]);
+    }
+
+    /**
+     * Map jenis absensi to status label.
+     */
+    private function mapJenisToStatus(string $jenis): string
+    {
+        return match ($jenis) {
+            'masuk' => 'Hadir',
+            'pulang' => 'Pulang',
+            default => 'Unknown',
+        };
     }
 
     /**
@@ -64,12 +130,22 @@ class GuruDashboardController extends Controller implements HasMiddleware
      */
     public function izinSakit(Request $request): \Illuminate\Http\Response
     {
-        // Dummy izin/sakit data
-        $items = [
-            ['nama' => 'Budi Santoso', 'nis' => '003', 'tanggal' => '2025-10-03', 'jenis' => 'Izin', 'keterangan' => 'Acara keluarga'],
-            ['nama' => 'Rina Wijaya', 'nis' => '004', 'tanggal' => '2025-10-04', 'jenis' => 'Sakit', 'keterangan' => 'Demam tinggi'],
-            ['nama' => 'Dedi Kurnia', 'nis' => '005', 'tanggal' => '2025-10-05', 'jenis' => 'Izin', 'keterangan' => 'Kunjungan dokter'],
-        ];
+        // Get izin/sakit data from database
+        $items = \App\Models\DataSakitIzin::with(['user.dataSiswa'])
+            ->get()
+            ->map(function ($izin) {
+                $siswa = $izin->user->dataSiswa ?? null;
+
+                return [
+                    'nama' => $siswa ? $siswa->nama : '-',
+                    'nis' => $siswa ? $siswa->nis : '-',
+                    'tanggal' => $izin->created_at->toDateString(),
+                    'jenis' => ucfirst($izin->tipe),
+                    'keterangan' => $izin->alasan,
+                    'status' => $izin->status,
+                ];
+            })
+            ->toArray();
 
         return response()->view('guru.izin_sakit', ['items' => $items]);
     }
