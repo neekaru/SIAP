@@ -325,7 +325,7 @@
             }
         });
 
-        btnConfirmLocationMasuk.addEventListener('click', function () {
+        function confirmLocationMasuk(retryCount = 0) {
             if (!navigator.geolocation) {
                 alert('Geolocation tidak didukung di browser Anda');
                 return;
@@ -337,7 +337,18 @@
                 const lat = pos.coords.latitude;
                 const lon = pos.coords.longitude;
                 const accuracy = pos.coords.accuracy;
-                const accuracyText = Math.round(accuracy) + ' m';
+                if (accuracy > 500) {
+                    if (retryCount < 3) {
+                        alert('Akurasi terlalu rendah (' + Math.round(accuracy) + 'm), mencoba lagi...');
+                        setTimeout(() => confirmLocationMasuk(retryCount + 1), 1000);
+                        return;
+                    } else {
+                        alert('Akurasi terlalu rendah setelah beberapa percobaan. Silakan coba lagi nanti.');
+                        accEl.innerText = 'Akurasi: -';
+                        return;
+                    }
+                }
+                const accuracyText = accuracy > 500 ? '>500 m' : Math.round(accuracy) + ' m';
                 accEl.innerText = 'Akurasi: ' + accuracyText;
                 locText.innerHTML = 'Posisi: ' + lat.toFixed(6) + ', ' + lon.toFixed(6) + '<br><small>Lokasi tervalidasi</small>';
                 if (btnConfirmAbsenMasuk) { btnConfirmAbsenMasuk.disabled = false; }
@@ -346,13 +357,17 @@
                 // Update map
                 mapMasuk.setView([lat, lon], 16);
                 L.marker([lat, lon]).addTo(mapMasuk).bindPopup('Lokasi Anda').openPopup();
-                L.circle([lat, lon], {color: 'blue', fillColor: '#30f', fillOpacity: 0.2, radius: accuracy}).addTo(mapMasuk);
+                L.circle([lat, lon], {color: 'blue', fillColor: '#30f', fillOpacity: 0.2, radius: Math.min(accuracy, 500)}).addTo(mapMasuk);
 
                 btnConfirmLocationMasuk.innerText = 'Lokasi tervalidasi';
             }, function (err) {
                 accEl.innerText = 'Akurasi: -';
                 alert('Gagal mendapatkan lokasi: ' + (err.message || 'unknown'));
-            }, {enableHighAccuracy: true, timeout: 10000});
+            }, {enableHighAccuracy: true, maximumAge: 0, timeout: 10000});
+        }
+
+        btnConfirmLocationMasuk.addEventListener('click', function () {
+            confirmLocationMasuk();
         });
 
         // This handle for Status Absensi
@@ -426,6 +441,8 @@
             }).then(r => r.json()).then(data => {
                 alert('Absen masuk berhasil');
                 modalMasuk.hide();
+                // do a refresh after done
+                location.reload();
             }).catch(err => { alert('Gagal: ' + err); });
         });
 
@@ -444,7 +461,7 @@
             }
         });
 
-        btnConfirmLocationPulang.addEventListener('click', function () {
+        function confirmLocationPulang(retryCount = 0) {
             if (!navigator.geolocation) {
                 alert('Geolocation tidak didukung di browser Anda');
                 return;
@@ -454,9 +471,22 @@
             accEl.innerText = 'Mencari posisi...';
             navigator.geolocation.getCurrentPosition(function (pos) {
                 const lat = pos.coords.latitude;
+                // enable high accuracy
+                // disable caching
                 const lon = pos.coords.longitude;
                 const accuracy = pos.coords.accuracy;
-                const accuracyText = Math.round(accuracy) + ' m';
+                if (accuracy > 500) {
+                    if (retryCount < 3) {
+                        alert('Akurasi terlalu rendah (' + Math.round(accuracy) + 'm), mencoba lagi...');
+                        setTimeout(() => confirmLocationPulang(retryCount + 1), 1000);
+                        return;
+                    } else {
+                        alert('Akurasi terlalu rendah setelah beberapa percobaan. Silakan coba lagi nanti.');
+                        accEl.innerText = 'Akurasi: -';
+                        return;
+                    }
+                }
+                const accuracyText = accuracy > 500 ? '>500 m' : Math.round(accuracy) + ' m';
                 accEl.innerText = 'Akurasi: ' + accuracyText;
                 locText.innerHTML = 'Posisi: ' + lat.toFixed(6) + ', ' + lon.toFixed(6) + '<br><small>Lokasi tervalidasi</small>';
                 if (btnConfirmPulang) { btnConfirmPulang.disabled = false; }
@@ -465,13 +495,17 @@
                 // Update map
                 mapPulang.setView([lat, lon], 16);
                 L.marker([lat, lon]).addTo(mapPulang).bindPopup('Lokasi Anda').openPopup();
-                L.circle([lat, lon], {color: 'blue', fillColor: '#30f', fillOpacity: 0.2, radius: accuracy}).addTo(mapPulang);
+                L.circle([lat, lon], {color: 'blue', fillColor: '#30f', fillOpacity: 0.2, radius: Math.min(accuracy, 500)}).addTo(mapPulang);
 
                 btnConfirmLocationPulang.innerText = 'Lokasi tervalidasi';
             }, function (err) {
                 accEl.innerText = 'Akurasi: -';
                 alert('Gagal mendapatkan lokasi: ' + (err.message || 'unknown'));
-            }, {enableHighAccuracy: true, timeout: 10000});
+            }, {enableHighAccuracy: true, maximumAge: 0, timeout: 10000});
+        }
+
+        btnConfirmLocationPulang.addEventListener('click', function () {
+            confirmLocationPulang();
         });
 
         btnConfirmPulang.addEventListener('click', function () {
@@ -487,6 +521,7 @@
             }).then(r => r.json()).then(data => {
                 alert('Absen pulang berhasil');
                 modalPulang.hide();
+                location.reload();
             }).catch(err => { alert('Gagal: ' + err); });
         });
 
@@ -600,30 +635,30 @@
         }
 
         function updateLocationOnUI(type, lat, lon, accuracy) {
-            const accText = accuracy ? (Math.round(accuracy) + ' m') : 'Akurasi: -';
+            const accText = accuracy > 500 ? '>500 m' : (accuracy ? Math.round(accuracy) + ' m' : '-');
             if (type === 'masuk') {
                 const accEl = document.getElementById('masuk-accuracy');
                 const locText = document.getElementById('masuk-location-text');
-                if (accEl) accEl.innerText = 'Akurasi: ' + (accuracy ? Math.round(accuracy) + ' m' : '-');
+                if (accEl) accEl.innerText = 'Akurasi: ' + accText;
                 if (locText) locText.innerHTML = 'Posisi: ' + lat.toFixed(6) + ', ' + lon.toFixed(6) + '<br><small>Lokasi tervalidasi</small>';
                 if (btnConfirmAbsenMasuk) btnConfirmAbsenMasuk.disabled = false;
-                window._masukLocation = {lat: lat.toFixed(6), lon: lon.toFixed(6), accuracy: Math.round(accuracy) + ' m'};
+                window._masukLocation = {lat: lat.toFixed(6), lon: lon.toFixed(6), accuracy: accText};
                 if (mapMasuk) {
                     mapMasuk.setView([lat, lon], 16);
                     if (markerMasuk) { markerMasuk.setLatLng([lat, lon]); } else { markerMasuk = L.marker([lat, lon]).addTo(mapMasuk).bindPopup('Lokasi Anda').openPopup(); }
-                    if (circleMasuk) { circleMasuk.setLatLng([lat, lon]).setRadius(accuracy || 50); } else { circleMasuk = L.circle([lat, lon], {color: 'blue', fillColor: '#30f', fillOpacity: 0.2, radius: accuracy || 50}).addTo(mapMasuk); }
+                    if (circleMasuk) { circleMasuk.setLatLng([lat, lon]).setRadius(Math.min(accuracy || 50, 500)); } else { circleMasuk = L.circle([lat, lon], {color: 'blue', fillColor: '#30f', fillOpacity: 0.2, radius: Math.min(accuracy || 50, 500)}).addTo(mapMasuk); }
                 }
             } else if (type === 'pulang') {
                 const accEl = document.getElementById('pulang-accuracy');
                 const locText = document.getElementById('pulang-location-text');
-                if (accEl) accEl.innerText = 'Akurasi: ' + (accuracy ? Math.round(accuracy) + ' m' : '-');
+                if (accEl) accEl.innerText = 'Akurasi: ' + accText;
                 if (locText) locText.innerHTML = 'Posisi: ' + lat.toFixed(6) + ', ' + lon.toFixed(6) + '<br><small>Lokasi tervalidasi</small>';
                 if (btnConfirmPulang) btnConfirmPulang.disabled = false;
-                window._pulangLocation = {lat: lat.toFixed(6), lon: lon.toFixed(6), accuracy: Math.round(accuracy) + ' m'};
+                window._pulangLocation = {lat: lat.toFixed(6), lon: lon.toFixed(6), accuracy: accText};
                 if (mapPulang) {
                     mapPulang.setView([lat, lon], 16);
                     if (markerPulang) { markerPulang.setLatLng([lat, lon]); } else { markerPulang = L.marker([lat, lon]).addTo(mapPulang).bindPopup('Lokasi Anda').openPopup(); }
-                    if (circlePulang) { circlePulang.setLatLng([lat, lon]).setRadius(accuracy || 50); } else { circlePulang = L.circle([lat, lon], {color: 'blue', fillColor: '#30f', fillOpacity: 0.2, radius: accuracy || 50}).addTo(mapPulang); }
+                    if (circlePulang) { circlePulang.setLatLng([lat, lon]).setRadius(Math.min(accuracy || 50, 500)); } else { circlePulang = L.circle([lat, lon], {color: 'blue', fillColor: '#30f', fillOpacity: 0.2, radius: Math.min(accuracy || 50, 500)}).addTo(mapPulang); }
                 }
             }
         }
