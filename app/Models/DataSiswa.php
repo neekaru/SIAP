@@ -33,4 +33,9 @@ class DataSiswa extends Model
     {
         return $this->user && $this->user->role === 'siswa';
     }
+
+    public function absensi()
+    {
+        return $this->hasMany(DataAbsensi::class, 'siswa_id');
+    }
 }

@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreSiswaRequest;
+use App\Models\DataAbsensi;
 use App\Models\DataKelas;
 use App\Models\DataSiswa;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class SiswaController extends Controller
 {
@@ -121,5 +124,147 @@ class SiswaController extends Controller
         $dataSiswa->delete();
 
         return redirect()->route('siswa.index')->with('success', 'Siswa berhasil dihapus');
+    }
+
+    public function MasukAbsen(Request $request)
+    {
+        // handle data Masuk
+        $id_siswa = $request->input('id_siswa');
+        $tanggal = $request->input('jam_masuk');
+        $jenis = strtolower($request->input('status'));
+        $lokasi = $request->input('location');
+
+        $siswa = DataSiswa::where('user_id', $id_siswa)->first();
+        if (! $siswa) {
+            return null;
+        }
+
+        // Extract the absensi
+        $existingAbsen = DataAbsensi::where('siswa_id', $siswa->id)
+            ->whereDate('tanggal', now()->toDateString())
+            ->where('jenis', 'masuk')
+            ->first();
+
+        if ($existingAbsen) {
+            return $existingAbsen;
+        }
+
+        $absensi = DataAbsensi::create([
+            'siswa_id' => $siswa->id,
+            'tanggal' => $tanggal,
+            'jenis' => $jenis,
+            'lokasi_gps' => json_encode($lokasi),
+            'created_at' => now(),
+        ]);
+
+        if (! $absensi) {
+            Log::info('Absensi gagal disimpan untuk siswa dengan ID: '.($siswa ? $siswa->id : 'tidak ditemukan').'. Data request: ', [
+                'id_siswa' => $id_siswa,
+                'tanggal' => $tanggal,
+                'jenis' => $jenis,
+                'lokasi' => $lokasi,
+                'request_data' => $request->all(),
+            ]);
+
+            return response()->json([
+                'ok' => false,
+                'message' => 'Siswa Tidak di temukan',
+            ], 404);
+        }
+
+        return response()->json([
+            'ok' => 'true',
+            'type' => 'masuk',
+            'message' => 'Absensi Masuk Berhasil di catat',
+        ]);
+    }
+
+    public function PulangAbsen(Request $request)
+    {
+        // handle data Pulang
+        $id_siswa = $request->input('id_siswa');
+        $tanggal = $request->input('jam_masuk');
+        $jenis = strtolower($request->input('status'));
+        $lokasi = $request->input('location');
+
+        $siswa = DataSiswa::where('user_id', $id_siswa)->first();
+        if (! $siswa) {
+            return null;
+        }
+
+        // Extract the absensi
+        $existingAbsen = DataAbsensi::where('siswa_id', $siswa->id)
+            ->whereDate('tanggal', now()->toDateString())
+            ->where('jenis', 'pulang')
+            ->first();
+
+        if ($existingAbsen) {
+            return $existingAbsen;
+        }
+
+        $absensi = DataAbsensi::update([
+            'lokasi_gps' => json_encode($lokasi),
+            "jenis" => $jenis,
+            "updated_at" => now(),
+        ]);
+
+        if (! $absensi) {
+            Log::info('Absensi gagal disimpan untuk siswa dengan ID: '.($siswa ? $siswa->id : 'tidak ditemukan').'. Data request: ', [
+                'id_siswa' => $id_siswa,
+                'tanggal' => $tanggal,
+                'jenis' => $jenis,
+                'lokasi' => $lokasi,
+                'request_data' => $request->all(),
+            ]);
+
+            return response()->json([
+                'ok' => false,
+                'message' => 'Siswa Tidak di temukan',
+            ], 404);
+        }
+
+        return response()->json([
+            'ok' => 'true',
+            'type' => 'masuk',
+            'message' => 'Absensi Pulang Berhasil di catat',
+        ]);
+    }
+
+    public function StatusAbsensi(Request $request, int $idSiswa)
+    {
+        $siswa = DataSiswa::where('user_id', $idSiswa)->first();
+        if (! $siswa) {
+            return null;
+        }
+
+        // Find Absen masuk and Absen Pulang
+        $status = DataAbsensi::where('siswa_id', $siswa->id)->get('jenis')->first();
+        $statusValue = $status ? $status->jenis : 'Belum Absensi';
+
+        // Handle Absensi
+        // check status absensi nya
+        // Cari absensi masuk dan pulang untuk hari ini
+        $absenMasuk = DataAbsensi::where('siswa_id', $siswa->id)
+            ->whereDate('tanggal', now()->toDateString())
+            ->where('jenis', 'masuk')
+            ->first();
+
+        $absenPulang = DataAbsensi::where('siswa_id', $siswa->id)
+            ->whereDate('tanggal', now()->toDateString())
+            ->where('jenis', 'pulang')
+            ->first();
+
+        if ($absenMasuk) {
+            $statusValue = 'Sudah Absen Masuk';
+        } elseif ($absenPulang) {
+            $statusValue = 'Sudah Absen Pulang';
+        } else {
+            $statusValue = 'Belum Absensi';
+        }
+
+        return response()->json([
+            'id_siswa' => $siswa->id,
+            'status' => $statusValue,
+        ]);
     }
 }

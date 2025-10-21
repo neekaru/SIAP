@@ -75,8 +75,8 @@
                 <div>
                     <h5 class="mb-2">Status Kehadiran Hari ini</h5>
                     <div class="d-flex align-items-center">
-                        <span class="status-dot me-2" style="width:14px;height:14px;border-radius:50%;background:#2ecc40;display:inline-block"></span>
-                        <span class="fw-semibold">Belum Absen</span>
+                        <span class="status-dot me-2" id="dot-absensi" style="width:14px;height:14px;border-radius:50%;display:inline-block"></span>
+                        <span class="fw-semibold" id="status-absensi"></span>
                         <span class="mx-3 text-muted" id="tanggal-hari"></span>
                     </div>
                 </div>
@@ -249,6 +249,9 @@
         // Update current time every second (guard element existence, start clock)
         const timeEl = document.getElementById('current-time');
 
+        // global variable
+        const idSiswa = {{ auth()->user()->id }};
+
         function updateTime() {
             const now = new Date();
             const options = { hour: '2-digit', minute: '2-digit'};
@@ -263,14 +266,14 @@
         // Function to format date in Indonesian
         function formatIndonesianDate(date) {
             const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
                            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-            
+
             const dayName = days[date.getDay()];
             const day = date.getDate();
             const monthName = months[date.getMonth()];
             const year = date.getFullYear();
-            
+
             return `${dayName}, ${day} ${monthName} ${year}`;
         }
 
@@ -352,15 +355,74 @@
             }, {enableHighAccuracy: true, timeout: 10000});
         });
 
+        // This handle for Status Absensi
+        const StatusAbsensiElement = document.getElementById("status-absensi");
+
+        fetch(`/absen/status/${idSiswa}`, {
+            method: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            let statusText = "Alpha";
+            let dotColor = "red";
+
+            if (data && data.status) {
+                // Normalize status value to a display string and a lowercase matcher
+                const rawStatus = (typeof data.status === "string") ? data.status : (data.status.jenis ?? data.status.status ?? JSON.stringify(data.status));
+                statusText = rawStatus;
+                const lower = rawStatus.toLowerCase();
+
+                // Decide color by checking keywords (use includes to handle phrases like "Sudah Absen Masuk")
+                if (lower.includes('pulang')) {
+                    dotColor = "#ffc107"; // kuning
+                } else if (lower.includes('masuk') || lower.includes('hadir')) {
+                    dotColor = "#2ecc40"; // hijau
+                } else if (lower.includes('alpha') || lower.includes('belum') || lower.includes('tidak')) {
+                    dotColor = "red";
+                } else {
+                    // fallback heuristics: if contains "sudah absen" try to infer
+                    if (lower.includes('sudah absen')) {
+                            if (lower.includes('pulang')) {
+                                dotColor = "#ffc107";
+                            } else {
+                                dotColor = "#2ecc40";
+                            }
+                        }
+                    }
+            }
+
+            if (StatusAbsensiElement) {
+                let displayText = statusText.replace(/^\s*sudah\s+/i, '');
+                StatusAbsensiElement.innerText = displayText;
+            }
+            const dotEl = document.getElementById('dot-absensi');
+            if (dotEl) {
+                dotEl.style.background = dotColor;
+            }
+        })
+        .catch(err => {
+            if (StatusAbsensiElement) {
+                StatusAbsensiElement.innerText = "Alpha";
+            }
+            const dotEl = document.getElementById('dot-absensi');
+            if (dotEl) {
+                dotEl.style.background = "red";
+            }
+        });
+
         btnConfirmAbsenMasuk.addEventListener('click', function () {
             if (!window._masukLocation) { alert('Silakan konfirmasi lokasi terlebih dahulu'); return; }
+            var jam_masuk = new Date().toISOString().slice(0, 19).replace('T', ' ');
             fetch('/absen/masuk', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
-                body: JSON.stringify({location: window._masukLocation})
+                body: JSON.stringify({id_siswa: idSiswa, status: "Masuk", jam_masuk: jam_masuk, location: window._masukLocation})
             }).then(r => r.json()).then(data => {
                 alert('Absen masuk berhasil');
                 modalMasuk.hide();
@@ -414,13 +476,14 @@
 
         btnConfirmPulang.addEventListener('click', function () {
             if (!window._pulangLocation) { alert('Silakan konfirmasi lokasi terlebih dahulu'); return; }
+            var jam_pulang = new Date().toISOString().slice(0, 19).replace('T', ' ');
             fetch('/absen/pulang', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
-                body: JSON.stringify({location: window._pulangLocation})
+                body: JSON.stringify({id_siswa: idSiswa, status: "Pulang", jam_pulang: jam_pulang, location: window._pulangLocation})
             }).then(r => r.json()).then(data => {
                 alert('Absen pulang berhasil');
                 modalPulang.hide();
