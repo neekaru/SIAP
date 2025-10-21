@@ -202,13 +202,35 @@ class SiswaController extends Controller
             return $existingAbsen;
         }
 
-        $absensi = DataAbsensi::update([
+        // Find the "masuk" absensi for today
+        $absenMasuk = DataAbsensi::where('siswa_id', $siswa->id)
+            ->whereDate('tanggal', now()->toDateString())
+            ->where('jenis', 'masuk')
+            ->first();
+
+        if (! $absenMasuk) {
+            Log::info('Absensi pulang gagal: absensi masuk tidak ditemukan untuk siswa dengan ID: '.($siswa ? $siswa->id : 'tidak ditemukan').'. Data request: ', [
+                'id_siswa' => $id_siswa,
+                'tanggal' => $tanggal,
+                'jenis' => $jenis,
+                'lokasi' => $lokasi,
+                'request_data' => $request->all(),
+            ]);
+
+            return response()->json([
+                'ok' => false,
+                'message' => 'Absensi masuk belum dicatat, tidak bisa absen pulang',
+            ], 404);
+        }
+
+        // Update the "masuk" absensi to "pulang"
+        $absenMasuk->update([
             'lokasi_gps' => json_encode($lokasi),
-            "jenis" => $jenis,
-            "updated_at" => now(),
+            'jenis' => 'pulang',
+            'updated_at' => now(),
         ]);
 
-        if (! $absensi) {
+        if (! $absenMasuk) {
             Log::info('Absensi gagal disimpan untuk siswa dengan ID: '.($siswa ? $siswa->id : 'tidak ditemukan').'. Data request: ', [
                 'id_siswa' => $id_siswa,
                 'tanggal' => $tanggal,
