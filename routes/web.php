@@ -73,10 +73,9 @@ Route::resource('kelas', KelasController::class)->parameters([
 
 // Simple endpoints to accept attendance confirmations (AJAX)
 Route::post('/absen/masuk', [SiswaController::class, 'MasukAbsen'])->name('absen.masuk');
-
 Route::post('/absen/pulang', [SiswaController::class, 'PulangAbsen'])->name('absen.pulang');
-
 Route::get('/absen/status/{id}', [SiswaController::class, 'StatusAbsensi'])->name('absen.status');
+Route::post('/izin/request', [SiswaController::class, 'IzinSakit'])->name('absen.izin');
 
 // Proxy endpoint to avoid CORS and rate-limit issues when calling ipapi.co from browser
 Route::get('/ip-location', function (Request $request) {

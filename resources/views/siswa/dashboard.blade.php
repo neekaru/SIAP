@@ -223,6 +223,11 @@
             </div>
 
             <div class="mb-2">
+                <div class="small mb-1">Durasi (hari)</div>
+                <input type="number" id="izin-duration" class="form-control" min="0" value="0" />
+            </div>
+
+            <div class="mb-2">
                 <div class="small mb-1">Alasan / Keterangan</div>
                 <textarea id="izin-reason" rows="4" class="form-control"></textarea>
             </div>
@@ -537,14 +542,18 @@
             const typeEl = document.querySelector('input[name="izin_type"]:checked');
             const type = typeEl ? typeEl.value : 'izin';
             const date = document.getElementById('izin-date').value;
+            const duration = document.getElementById('izin-duration').value;
             const reason = document.getElementById('izin-reason').value.trim();
             const fileInput = document.getElementById('izin-file');
             if (!date) { alert('Pilih tanggal'); return; }
+            if (duration === '' || parseInt(duration) < 0) { alert('Masukkan durasi yang valid (minimal 0)'); return; }
             if (!reason) { alert('Masukkan alasan atau keterangan'); return; }
 
             const formData = new FormData();
+            formData.append('id_siswa', idSiswa);
             formData.append('type', type);
             formData.append('date', date);
+            formData.append('duration', duration);
             formData.append('reason', reason);
             if (fileInput && fileInput.files[0]) { formData.append('file', fileInput.files[0]); }
 

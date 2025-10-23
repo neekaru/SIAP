@@ -6,6 +6,7 @@ use App\Http\Requests\StoreSiswaRequest;
 use App\Models\DataAbsensi;
 use App\Models\DataKelas;
 use App\Models\DataSiswa;
+use App\Models\DataSakitIzin;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -250,6 +251,68 @@ class SiswaController extends Controller
             'type' => 'masuk',
             'message' => 'Absensi Pulang Berhasil di catat',
         ]);
+    }
+
+    public function IzinSakit(Request $request)
+    {
+        // parse
+        $id_siswa = $request->input('id_siswa');
+        $tanggal = $request->input('date');
+        $type = $request->input('type'); // izin or sakit
+        $alasan = $request->input('reason');
+        $durasi_hari =  $request->input('duration', 1);
+
+        // handle file (binary), optional
+        $file = $request->file('file');
+
+        // parse DataSiswa
+        $siswa = DataSiswa::where('user_id', $id_siswa)->first();
+        if (! $siswa) {
+            return null;
+        }
+
+        // For adding handle sakit
+        try {
+            $data = [
+                'siswa_id' => $siswa->id,
+                'tipe' => $type,
+                'alasan' => $alasan,
+                'document_path' => $file ?: null,
+                'status' => 'pending',
+                'durasi_hari' => $durasi_hari,
+                'divalidasi_oleh' => null,
+                'divalidasi_at' => null,
+            ];
+
+            $izinSakit = DataSakitIzin::create($data);
+
+            if (! $izinSakit) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'Gagal mencatat Izin/Sakit',
+                ], 500);
+            }
+
+            return response()->json([
+                'ok' => true,
+                'message' => 'Izin/Sakit Berhasil di catat',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Gagal mencatat Izin/Sakit: '.$e->getMessage(), [
+                'data' => [
+                    'siswa_id' => $siswa->id,
+                    'tipe' => $type,
+                    'alasan' => $alasan,
+                    'document_path' => $file,
+                ],
+                'exception' => $e,
+            ]);
+            return response()->json([
+                'ok' => false,
+                'message' => 'Terjadi kesalahan saat mencatat Izin/Sakit',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function StatusAbsensi(Request $request, int $idSiswa)

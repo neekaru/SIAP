@@ -38,6 +38,7 @@
 
         <h2 class="section-title text-white fw-semibold mb-4 mt-2">Data Kehadiran</h2>
 
+
         <div class="card table-card border-0 bg-white">
             <div class="card-header d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
                 <div>
@@ -108,7 +109,7 @@
                 if (button.textContent.trim() === 'Alpa') {
                     button.addEventListener('click', function(e) {
                         e.preventDefault();
-                        
+
                         Swal.fire({
                             title: 'Konfirmasi',
                             text: 'Apakah anda ingin Alpha ???',

@@ -21,13 +21,6 @@ class GuruDashboardController extends Controller implements HasMiddleware
     {
         // In a real app you'd compute these using models/queries. We'll provide
         // mock numbers that match the design: total siswa, hadir, izin, belum absen.
-        $data = [
-            'total_siswa' => 32,
-            'hadir' => 6,
-            'izin_sakit' => 12,
-            'belum_absen' => 24,
-        ];
-
         // Get today's attendance data for "Absen Hari ini" section
         $today_attendance = [
             ['nama' => 'Ahmad Santoso', 'nis' => '001', 'waktu' => '07:05', 'status' => 'Hadir'],
@@ -68,50 +61,62 @@ class GuruDashboardController extends Controller implements HasMiddleware
     /**
      * Show the kehadiran (attendance) page for guru.
      */
-    public function kehadiran(Request $request): \Illuminate\Http\Response
-    {
-        // Get today's date
-        $today = now()->toDateString();
+     public function kehadiran(Request $request): \Illuminate\Http\Response
+     {
+         // Get today's date
+         $today = now()->toDateString();
 
-        // Get all students
-        $siswaList = \App\Models\DataSiswa::all();
+         // Get all students
+         $siswaList = \App\Models\DataSiswa::all();
 
-        // Get today's attendance with eager loading
-        $todayAbsensi = \App\Models\DataAbsensi::with('siswa')
-            ->where('tanggal', $today)
-            ->get()
-            ->keyBy('siswa_id');
+          // Get today's attendance with eager loading
+          $todayAbsensi = \App\Models\DataAbsensi::with('siswa')
+              ->whereDate('tanggal', $today)
+              ->get()
+              ->groupBy('siswa_id');
 
-        // Get today's izin/sakit
-        $todayIzin = \App\Models\DataSakitIzin::whereDate('created_at', $today)
+          // Get today's izin/sakit
+          $todayIzin = \App\Models\DataSakitIzin::whereDate('created_at', $today)
             ->where('status', 'tervalidasi')
-            ->get()
-            ->keyBy('siswa_id');
+              ->get()
+              ->keyBy('siswa_id');
 
-        $kehadiran = $siswaList->map(function ($siswa) use ($todayAbsensi, $todayIzin) {
-            $siswaId = $siswa->id;
-            $status = 'Alpa'; // Default
-            $waktu = '-';
+         $kehadiran = $siswaList->map(function ($siswa) use ($todayAbsensi, $todayIzin) {
+             $siswaId = $siswa->id;
+             $status = 'Alpa'; // Default
+             $waktu = '-';
 
-            if ($todayAbsensi->has($siswaId)) {
-                $absensi = $todayAbsensi->get($siswaId);
-                $status = $this->mapJenisToStatus($absensi->jenis);
-                $waktu = $absensi->created_at->format('H:i');
-            } elseif ($todayIzin->has($siswaId)) {
-                $izin = $todayIzin->get($siswaId);
-                $status = ucfirst($izin->tipe); // Sakit or Izin
-            }
+             if ($todayAbsensi->has($siswaId)) {
+                 // Ambil absensi pertama dengan jenis 'masuk' jika ada, jika tidak ambil absensi pertama
+                 $absensiMasuk = $todayAbsensi->get($siswaId)->firstWhere('jenis', 'masuk');
+                 $absensi = $absensiMasuk ?: $todayAbsensi->get($siswaId)->first();
 
-            return [
-                'nama' => $siswa->nama,
-                'nis' => $siswa->nis,
-                'waktu' => $waktu,
-                'status' => $status,
-            ];
-        })->toArray();
+                  if ($absensi) {
+                      $status = $this->mapJenisToStatus($absensi->jenis);
+                      $waktu = $absensi->created_at ? \Carbon\Carbon::parse($absensi->created_at)->format('H:i') : '-';
+                  }
+             } elseif ($todayIzin->has($siswaId)) {
+                 $izin = $todayIzin->get($siswaId);
+                 $status = ucfirst($izin->tipe); // Sakit or Izin
+             }
 
-        return response()->view('guru.kehadiran', ['kehadiran' => $kehadiran]);
-    }
+             return [
+                 'nama' => $siswa->nama,
+                 'nis' => $siswa->nis,
+                 'waktu' => $waktu,
+                 'status' => $status,
+             ];
+         })->toArray();
+
+          $debug = [
+              'total_siswa' => $siswaList->count(),
+              'total_absensi_today' => $todayAbsensi->flatten()->count(),
+              'total_izin_today' => $todayIzin->count(),
+              'today_date' => $today,
+          ];
+
+          return response()->view('guru.kehadiran', ['kehadiran' => $kehadiran, 'debug' => $debug]);
+     }
 
     /**
      * Map jenis absensi to status label.
