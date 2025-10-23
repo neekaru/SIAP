@@ -69,17 +69,17 @@ class GuruDashboardController extends Controller implements HasMiddleware
          // Get all students
          $siswaList = \App\Models\DataSiswa::all();
 
-          // Get today's attendance with eager loading
-          $todayAbsensi = \App\Models\DataAbsensi::with('siswa')
-              ->whereDate('tanggal', $today)
-              ->get()
-              ->groupBy('siswa_id');
+         // Get today's attendance with eager loading
+         $todayAbsensi = \App\Models\DataAbsensi::with('siswa')
+             ->whereDate('tanggal', $today)
+             ->get()
+             ->groupBy('siswa_id');
 
-          // Get today's izin/sakit
-          $todayIzin = \App\Models\DataSakitIzin::whereDate('created_at', $today)
-            ->where('status', 'tervalidasi')
-              ->get()
-              ->keyBy('siswa_id');
+         // Get today's izin/sakit
+         $todayIzin = \App\Models\DataSakitIzin::whereDate('created_at', $today)
+             ->where('status', 'tervalidasi')
+             ->get()
+             ->keyBy('siswa_id');
 
          $kehadiran = $siswaList->map(function ($siswa) use ($todayAbsensi, $todayIzin) {
              $siswaId = $siswa->id;
@@ -87,20 +87,28 @@ class GuruDashboardController extends Controller implements HasMiddleware
              $waktu = '-';
 
              if ($todayAbsensi->has($siswaId)) {
-                 // Ambil absensi pertama dengan jenis 'masuk' jika ada, jika tidak ambil absensi pertama
+                 // Ambil absensi pertama dengan jenis 'masuk' jika ada, jika tidak ambil absensi dengan jenis 'alpha', jika tidak ambil absensi pertama
                  $absensiMasuk = $todayAbsensi->get($siswaId)->firstWhere('jenis', 'masuk');
-                 $absensi = $absensiMasuk ?: $todayAbsensi->get($siswaId)->first();
+                 $absensiAlpha = $todayAbsensi->get($siswaId)->firstWhere('jenis', 'alpha');
+                 $absensi = $absensiMasuk ?: ($absensiAlpha ?: $todayAbsensi->get($siswaId)->first());
 
-                  if ($absensi) {
-                      $status = $this->mapJenisToStatus($absensi->jenis);
-                      $waktu = $absensi->created_at ? \Carbon\Carbon::parse($absensi->created_at)->format('H:i') : '-';
-                  }
+                 if ($absensi) {
+                     // Map jenis to status, including 'alpha'
+                     $status = match ($absensi->jenis) {
+                         'masuk' => 'Hadir',
+                         'pulang' => 'Pulang',
+                         'alpha' => 'Alpa',
+                         default => 'Unknown',
+                     };
+                     $waktu = $absensi->created_at ? \Carbon\Carbon::parse($absensi->created_at)->format('H:i') : '-';
+                 }
              } elseif ($todayIzin->has($siswaId)) {
                  $izin = $todayIzin->get($siswaId);
                  $status = ucfirst($izin->tipe); // Sakit or Izin
              }
 
              return [
+                 'id' => $siswaId,
                  'nama' => $siswa->nama,
                  'nis' => $siswa->nis,
                  'waktu' => $waktu,
@@ -108,14 +116,14 @@ class GuruDashboardController extends Controller implements HasMiddleware
              ];
          })->toArray();
 
-          $debug = [
-              'total_siswa' => $siswaList->count(),
-              'total_absensi_today' => $todayAbsensi->flatten()->count(),
-              'total_izin_today' => $todayIzin->count(),
-              'today_date' => $today,
-          ];
+         $debug = [
+             'total_siswa' => $siswaList->count(),
+             'total_absensi_today' => $todayAbsensi->flatten()->count(),
+             'total_izin_today' => $todayIzin->count(),
+             'today_date' => $today,
+         ];
 
-          return response()->view('guru.kehadiran', ['kehadiran' => $kehadiran, 'debug' => $debug]);
+         return response()->view('guru.kehadiran', ['kehadiran' => $kehadiran, 'debug' => $debug]);
      }
 
     /**

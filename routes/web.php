@@ -35,11 +35,13 @@ Route::get('/login/admin', [LoginController::class, 'show'])->name('login.admin'
 Route::get('/siswa-dashboard', [SiswaDashboardController::class, 'index'])->name('siswa.dashboard');
 
 // Guru dashboard
-Route::prefix('guru-dashboard')->group(function () {
+Route::prefix('guru-dashboard')->middleware('guru')->group(function () {
     Route::get('/', [GuruDashboardController::class, 'index'])->name('guru.dashboard');
     Route::get('/kehadiran', [GuruDashboardController::class, 'kehadiran'])->name('guru.kehadiran');
     Route::get('/izin_sakit', [GuruDashboardController::class, 'izinSakit'])->name('guru.izin_sakit');
     Route::get('/stats', [GuruDashboardController::class, 'StatsGuruDashboard'])->name('guru.stats');
+    // This for handle Data Kehadiran handling
+    Route::post('/validasi_kehadiran', [\App\Http\Controllers\GuruAdditionalController::class, 'ValidasiKehadiran'])->name('guru.validasi_kehadiran');
 });
 
 // Admin dashboard
@@ -72,9 +74,12 @@ Route::resource('kelas', KelasController::class)->parameters([
 ]);
 
 // Simple endpoints to accept attendance confirmations (AJAX)
-Route::post('/absen/masuk', [SiswaController::class, 'MasukAbsen'])->name('absen.masuk');
-Route::post('/absen/pulang', [SiswaController::class, 'PulangAbsen'])->name('absen.pulang');
-Route::get('/absen/status/{id}', [SiswaController::class, 'StatusAbsensi'])->name('absen.status');
+Route::prefix('absen')->group(function () {
+    Route::post('/masuk', [SiswaController::class, 'MasukAbsen'])->name('absen.masuk');
+    Route::post('/pulang', [SiswaController::class, 'PulangAbsen'])->name('absen.pulang');
+    Route::get('/status/{id}', [SiswaController::class, 'StatusAbsensi'])->name('absen.status');
+});
+// This for izin and Sakit
 Route::post('/izin/request', [SiswaController::class, 'IzinSakit'])->name('absen.izin');
 
 // Proxy endpoint to avoid CORS and rate-limit issues when calling ipapi.co from browser

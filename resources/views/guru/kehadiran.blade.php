@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Data Kehadiran - Guru</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -82,10 +83,11 @@
                                         <span class="badge {{ $badgeClass }}">{{ $statusLabel }}</span>
                                     </td>
                                     <td class="text-center">
-                                        <div class="d-flex justify-content-center gap-2">
-                                            <button class="btn btn-sm btn-outline-primary">Validasi</button>
-                                            <button class="btn btn-sm btn-outline-danger">Alpa</button>
-                                        </div>
+                                        @if(strtolower($statusLabel) === 'hadir')
+                                            <button class="btn btn-sm btn-outline-danger toggle-status" data-current-status="hadir" data-id="{{ $row['id'] ?? '' }}">Alpa</button>
+                                        @elseif(in_array(strtolower($statusLabel), ['alpa', 'alpha']))
+                                            <button class="btn btn-sm btn-outline-success toggle-status" data-current-status="alpa" data-id="{{ $row['id'] ?? '' }}">Hadir</button>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty
@@ -104,34 +106,95 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Handle Alpa button clicks
-            document.querySelectorAll('.btn-outline-danger').forEach(button => {
-                if (button.textContent.trim() === 'Alpa') {
-                    button.addEventListener('click', function(e) {
-                        e.preventDefault();
+            // Handle toggle status button clicks
+            document.querySelectorAll('.toggle-status').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
 
-                        Swal.fire({
-                            title: 'Konfirmasi',
-                            text: 'Apakah anda ingin Alpha ???',
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#dc3545',
-                            cancelButtonColor: '#6c757d',
-                            confirmButtonText: 'Ya, Alpa',
-                            cancelButtonText: 'Batal'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                // Here you can add the logic to mark as absent
-                                // For now, just show success message
+                    const currentStatus = this.getAttribute('data-current-status');
+                    const row = this.closest('tr');
+                    const siswaId = this.getAttribute('data-id');
+                    // Ambil tanggal dari waktu sekarang dengan format seperti updated_at (YYYY-MM-DD HH:mm:ss)
+                    function getCurrentDateTime() {
+                        const now = new Date();
+                        const pad = n => n < 10 ? '0' + n : n;
+                        const year = now.getFullYear();
+                        const month = pad(now.getMonth() + 1);
+                        const day = pad(now.getDate());
+                        const hours = pad(now.getHours());
+                        const minutes = pad(now.getMinutes());
+                        const seconds = pad(now.getSeconds());
+                        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                    }
+                    const tanggal = getCurrentDateTime();
+
+                    let newStatus, confirmText, confirmButtonText, confirmButtonColor;
+
+                    if (currentStatus === 'hadir') {
+                        newStatus = 'Alpa';
+                        confirmText = 'Apakah anda ingin Alpha ???';
+                        confirmButtonText = 'Ya, Alpa';
+                        confirmButtonColor = '#dc3545';
+                    } else {
+                        newStatus = 'Hadir';
+                        confirmText = 'Apakah anda ingin ubah ke Hadir ???';
+                        confirmButtonText = 'Ya, Hadir';
+                        confirmButtonColor = '#28a745';
+                    }
+
+                    Swal.fire({
+                        title: 'Konfirmasi',
+                        text: confirmText,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: confirmButtonColor,
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: confirmButtonText,
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Kirim AJAX POST ke endpoint validasi kehadiran
+                            fetch("{{ route('guru.validasi_kehadiran') }}", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                                },
+                                body: JSON.stringify({
+                                    siswa_id: siswaId,
+                                    tanggal: tanggal,
+                                    action: newStatus
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire(
+                                        'Berhasil!',
+                                        `Status siswa telah diubah menjadi ${newStatus}.`,
+                                        'success'
+                                    ).then(() => {
+                                        // Reload halaman agar data terbaru muncul
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        'Gagal!',
+                                        data.message || 'Gagal memvalidasi data absensi.',
+                                        'error'
+                                    );
+                                }
+                            })
+                            .catch(error => {
                                 Swal.fire(
-                                    'Berhasil!',
-                                    'Status siswa telah diubah menjadi Alpa.',
-                                    'success'
+                                    'Error!',
+                                    'Terjadi kesalahan saat memproses permintaan.',
+                                    'error'
                                 );
-                            }
-                        });
+                            });
+                        }
                     });
-                }
+                });
             });
         });
     </script>
